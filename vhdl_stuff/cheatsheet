@@ -1,0 +1,21 @@
+
+cd [proj]
+mkdir work
+
+# import
+ghdl -i --workdir=work *.vhdl
+
+# make
+ghdl -m --workdir=work [proj_target]
+
+# run
+ghdl -r --workdir=work [proj_target] [--assert-level=note]
+
+# remove generated files
+ghdl --clean --workdir=work
+
+# remove generated files and library files
+ghdl --remove --workdir=work
+
+# delete everything except source
+rm -rf work

@@ -1,0 +1,21 @@
+Workflow for Primer 20K
+
+Programs used:
+
+yosys: synthesiser, converts the verilog/vhdl into a digital logic circuit
+
+nextpnr: place and route, take the digital circuit and maps it onto the logic
+	tiles of the fpga.
+
+gowin_pack: part of apicula, converts the logic unit mapping into a bitstream
+
+openFPGALoader: flasher, take the bit stream and sends it to the fpga through
+	usb JTAG interface.
+
+Rough workflow for nano 9k
+> yosys -D LEDS_NR=6 -p "read_verilog blinky.v; synth_gowin -json blinky.json"
+> nextpnr-gowin --json blinky.json --write pnrblinky.json --device GW1NR-LV9QN88PC6/I5 --family GW1N-9C --cst tangnano9k.cst
+> gowin_pack -d GW1N-9C -o pack.fs pnrblinky.json
+> openFPGALoader -b tangnano9k pack.fs
+
+Notes:

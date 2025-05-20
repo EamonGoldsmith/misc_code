@@ -1,0 +1,32 @@
+hello world - DONE
+test build system and libraries
+
+4-bit adder
+5 bit result, addition
+
+4-bit register
+should be able to clock in/out a value.
+should be able to enable/disable
+
+finite state machine
+traffic light controller, model a real intersection
+
+display decoder
+7 seg hex decoder, 8 bit
+
+clock divider
+lowers a clock frequency
+
+simple counter
+4 bit counter then reset
+
+comparator
+two 4 bit numbers, LT, GT, ET, OT
+
+multiplier
+two 4 bit numbers to make 8 bit result
+
+4-bit ALU
+combine the comparator, multiplier and adder
+to make a reasonbaly functional ALU.
+should have 4 bit instruction and two 4 bit inputs.

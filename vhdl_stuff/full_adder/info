@@ -1,0 +1,2 @@
+The adder must be analysed to the dir first, then the tb is analysed.
+Otherwise the tb will complain about adder not existing.

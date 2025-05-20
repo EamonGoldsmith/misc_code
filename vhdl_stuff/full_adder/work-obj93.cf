@@ -1,0 +1,10 @@
+v 4
+file . "adder.vhdl" "2bb5fc8837f53008cd2a9ead4ba8a98f435c3ff0" "20241121000707.781":
+  entity adder at 1( 0) + 0 on 11;
+  architecture rtl of adder at 11( 182) + 0 on 12;
+file . "adder_tb.vhdl" "7b13e0218e5c2885f6a796dca072d17560a0cbab" "20241121000707.781":
+  entity adder_tb at 1( 0) + 0 on 13;
+  architecture behav of adder_tb at 8( 106) + 0 on 14;
+file . "full_adder.vhdl" "c745e8a76ba16e166a111df41c9ee82593661ae9" "20241121000428.767":
+  entity full_adder at 1( 0) + 0 on 4;
+  architecture rtl of full_adder at 7( 108) + 0 on 4;

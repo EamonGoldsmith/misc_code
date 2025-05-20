@@ -1,0 +1,117 @@
+v 4
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "alu-behaviour.vhdl" "f4984dfbae0fb204caed1342756e7ffd842f9545" "20240829132102.689":
+  architecture behaviour of alu at 32( 1223) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "alu_types.vhdl" "0d1db20068ddefe4557b61d872a21791b08698ba" "20240829132102.690":
+  package alu_types at 32( 1218) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "alu.vhdl" "55c99bfee55cb62fda6d272f22819b734c0f53af" "20240829132102.690":
+  entity alu at 32( 1208) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "bv_arithmetic-body.vhdl" "41e1dee1644c89742f8ffd03a1f404a643adeedc" "20240829132132.816":
+  package body bv_arithmetic at 39( 1723) + 0 on 20;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "bv_arithmetic.vhdl" "f61fda38bb1ed7dfc3180efdbb62530f661e0e2a" "20240829132132.816":
+  package bv_arithmetic at 39( 1727) + 0 on 19 body;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "bv_test-bench.vhdl" "d089cfaefde430b2b1bcf8f8d90d34445aecca11" "20240829132102.693":
+  architecture bench of bv_test at 32( 1253) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "bv_test.vhdl" "e80055cb74c64c96d30f97ff8406f4ac4c2be353" "20240829132102.693":
+  entity bv_test at 32( 1253) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "cache-behaviour.vhdl" "1855b8d4a0863354543168250e772e6f9892a47d" "20240829132102.693":
+  architecture behaviour of cache at 32( 1228) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "cache_types.vhdl" "7f119a95d4fe01eae61f013074353a78db6ccf68" "20240829132102.693":
+  package cache_types at 32( 1227) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "cache.vhdl" "420b7c814bcfafef0092ef933b6dea6c25398b30" "20240829132102.693":
+  entity cache at 32( 1212) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "clock_gen-behaviour.vhdl" "3da328be3e6f5d2a461b6aa40294a3dc7a2fce0a" "20240829132132.816":
+  architecture behaviour of clock_gen at 32( 1246) + 0 on 17;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "clock_gen_test-bench.vhdl" "ec4750ffcb979cf08c7b135f9c1472d22b42beea" "20240829132102.693":
+  architecture bench of clock_gen_test at 32( 1245) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "clock_gen_test.vhdl" "680329e0b68ba07063de817d72a07b8481773cc8" "20240829132102.693":
+  entity clock_gen_test at 32( 1245) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "clock_gen.vhdl" "30ba924223be992b7ca0ccd0b83362c479733606" "20240829132132.816":
+  entity clock_gen at 32( 1225) + 0 on 16;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "controller-behaviour.vhdl" "13c24e8b6c079c1885d454a221eebb30465d80af" "20240829132102.694":
+  architecture behaviour of controller at 32( 1246) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "controller.vhdl" "87a589548c70f1400528f78ea005c838e90027ab" "20240829132102.694":
+  entity controller at 32( 1231) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx-behaviour.vhdl" "5835690f2ce633d0f082693ccf9a0822fe7c8bc7" "20240829132132.816":
+  architecture behaviour of dlx at 32( 1255) + 0 on 29;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_bus_monitor-behaviour.vhdl" "e0fd6de9630cffcd8c8aaf86df60b276bcef463b" "20240829132132.816":
+  architecture behaviour of dlx_bus_monitor at 32( 1268) + 0 on 27;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_bus_monitor.vhdl" "3c9e3b4ec0c3a0b0ef9361a6afa542b70f345f08" "20240829132132.816":
+  entity dlx_bus_monitor at 32( 1230) + 0 on 24;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_instr-body.vhdl" "c042eb2c1b6e667e79fc817d7b2341fbd0e7b20c" "20240829132132.816":
+  package body dlx_instr at 32( 1247) + 0 on 26;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx-instrumented.vhdl" "5255a7979a05271a03e0541a4f802c8e42e59205" "20240829132102.696":
+  architecture instrumented of dlx at 33( 1341) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_instr.vhdl" "6d475b69e79d63625da462f2054b8e08606f76f8" "20240829132132.816":
+  package dlx_instr at 32( 1229) + 0 on 25 body;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx-rtl.vhdl" "eed93d04f63fbee8b041defbb712b097088708a9" "20240829132102.697":
+  architecture rtl of dlx at 32( 1239) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_test_behaviour.vhdl" "36964a46110eb2e066b9164396426ab2ece8d21e" "20240829132132.816":
+  configuration dlx_test_behaviour at 32( 1261) + 0 on 30;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_test-bench_cache.vhdl" "ac683d89a5e0f12c8701ad59014aa62a130e1cbb" "20240829132102.697":
+  architecture bench_cache of dlx_test at 33( 1342) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_test-bench.vhdl" "af28f9af3ebf7d39d05d07f30c50f8c9af8fc67c" "20240829132132.816":
+  architecture bench of dlx_test at 33( 1286) + 0 on 15;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_test_cache.vhdl" "5959035aa1fff5bba66fa8d94156160cf1ce7679" "20240829132102.697":
+  configuration dlx_test_cache at 33( 1275) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_test_instrumented.vhdl" "e14b132cb6c006fd98c4ee3e07aa09e3ee0f36df" "20240829132102.697":
+  configuration dlx_test_instrumented at 33( 1317) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_test_rtl.vhdl" "dde65b7295fe1a789870a1f99990acf1278fcd0f" "20240829132102.697":
+  configuration dlx_test_rtl at 33( 1286) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_test.vhdl" "871ead955de05eac965194852bcb84d014912cc4" "20240829132132.816":
+  entity dlx_test at 32( 1227) + 0 on 11;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_types-body.vhdl" "e5b3f3491cd5171350fb4c048362a6f8fac57ee4" "20240829132132.816":
+  package body dlx_types at 32( 1232) + 0 on 13;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx_types.vhdl" "20d1d9348d2ead55e47bc7a4a43414274ad2b95e" "20240829132132.816":
+  package dlx_types at 32( 1236) + 0 on 12 body;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "dlx.vhdl" "0747da8ef47fad3f6e0dbe3d054784d45da0e774" "20240829132132.816":
+  entity dlx at 32( 1219) + 0 on 28;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "images-body.vhdl" "3c395567ebc5df6a703f14b484b0e9b1840e087d" "20240829132132.816":
+  package body images at 36( 1424) + 0 on 22;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "images_test-bench.vhdl" "666432037927612677ff3b01822a96c72d313738" "20240829132102.698":
+  architecture bench of images_test at 31( 1252) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "images_test.vhdl" "f00425e8b98d02d6af68b108d6be9e2fdb7fce57" "20240829132102.698":
+  entity images_test at 31( 1240) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "images.vhdl" "1d1fa916372660165a29302092f49debb8602a72" "20240829132132.816":
+  package images at 36( 1428) + 0 on 21 body;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "ir-behaviour.vhdl" "85d1a6cd3428226669e344d87050261b432ea5b4" "20240829132102.698":
+  architecture behaviour of ir at 32( 1239) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "ir.vhdl" "126a5c616d0c44e4acb1e7943164fa2fe0dbe73b" "20240829132102.698":
+  entity ir at 32( 1224) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "latch-behaviour.vhdl" "e31cf37a64d8a0797aa7c3b7c777a36351ebff72" "20240829132102.698":
+  architecture behaviour of latch at 32( 1239) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "latch.vhdl" "686e248433aeaa56cc0771e9f4c6ffae123e1c6d" "20240829132102.698":
+  entity latch at 32( 1224) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "memory-behaviour.vhdl" "099f1d548ffd44e1967fa2cebbd4e79150b06b45" "20240829132132.816":
+  architecture behaviour of memory at 32( 1235) + 0 on 23;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "memory_test-bench.vhdl" "3ad7769e673e8866e090dfa98513b8c7d575de66" "20240829132102.699":
+  architecture bench of memory_test at 32( 1261) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "memory_test.vhdl" "8aa9ed980021099a7f115293cf59e68ed9ecb265" "20240829132102.699":
+  entity memory_test at 32( 1235) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "memory.vhdl" "331d75fccf981110414a765c25e368ed7c6baf29" "20240829132132.816":
+  entity memory at 32( 1219) + 0 on 18;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "mem_types.vhdl" "a01ff6ef5d6840eb1fd20eb5e15a08aef69b27c8" "20240829132132.816":
+  package mem_types at 32( 1217) + 0 on 14;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "mux2-behaviour.vhdl" "d9562cc7695121a9e6080902b9b63c70486c6e0b" "20240829132102.699":
+  architecture behaviour of mux2 at 32( 1242) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "mux2.vhdl" "168df46da99551554868d27a9bdc0836daa22a6e" "20240829132102.699":
+  entity mux2 at 32( 1227) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_1_out-behaviour.vhdl" "0a895450e075369f51fe5172afd262c52e9a3051" "20240829132102.699":
+  architecture behaviour of reg_1_out at 32( 1260) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_1_out.vhdl" "55f68ce6db22793ff31f2602e077fefcc0377b52" "20240829132102.699":
+  entity reg_1_out at 32( 1245) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_2_1_out-behaviour.vhdl" "b85bbfc543d59f6b7e96d4ccd9ae8621be5d9a09" "20240829132102.699":
+  architecture behaviour of reg_2_1_out at 33( 1291) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_2_1_out.vhdl" "4b61319010e87b1e539dc88b87a6cd4e21c1929c" "20240829132102.699":
+  entity reg_2_1_out at 33( 1276) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_2_out-behaviour.vhdl" "26aaac5ee4a0f1debeeb390aff95d7a140dd938c" "20240829132102.699":
+  architecture behaviour of reg_2_out at 32( 1261) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_2_out.vhdl" "0f3fd07b064f4c72b48bf689567b7ee0b01e69c1" "20240829132102.699":
+  entity reg_2_out at 32( 1246) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_3_out-behaviour.vhdl" "77ff410518a99949e187227240413c6f4b1e0d99" "20240829132102.699":
+  architecture behaviour of reg_3_out at 32( 1263) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_3_out.vhdl" "01a9f724209f4f1383ddd9c0071834d7b2559fb4" "20240829132102.699":
+  entity reg_3_out at 32( 1248) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_file-behaviour.vhdl" "ce7b41d96d2c605d91ca07fe25523079a4705be7" "20240829132102.699":
+  architecture behaviour of reg_file at 32( 1238) + 0 on 4;
+file "/home/eamon/misc_code/vhdl_stuff/dlx/" "reg_file.vhdl" "fa514d470f995d0813192e3a321eefd13512c213" "20240829132102.699":
+  entity reg_file at 32( 1223) + 0 on 4;
