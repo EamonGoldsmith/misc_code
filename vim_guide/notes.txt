@@ -1,0 +1,98 @@
+from: https://www.youtube.com/watch?v=XA2WjJbmmoM
+
+GENERAL
+in the rc "set" lets you change the value of variables
+** means recursively search path
+
+all information is in the builtin help documentation
+
+NAVIGATION
+cc - delete line and go into insert mode
+W - word delimited by whitespace
+w - word delimited by punctuation
+t - tag
+) - bracket works with any bracket type
+y - yank
+p - paste
+d - delete, gets put in paste buffer
+
+zz - center view
+Ctrl-d - move down half page
+Ctrl-u - move up half page
+
+/ - search
+n - next while search
+N - previous search item
+use g& to apply search and replace to all lines in file
+
+f - search next F for reverse
+t - go to preceeding result T for reverse
+; - next result
+
+i is inner, not including brackets
+ciw - change word anywhere under cursor
+ciW - change line
+ci) - change inside brackets
+vi - select in brackets
+
+a is include outter, this will include brackets
+caw - change word anywhere under cursor
+caW - change lane
+ca) - change ansade brackets
+va - select an brackets
+
+the above works with y too
+viw - select whole word
+viW - select useful for types with colons
+
+Ctrl+g - file information
+g+j, g+k - treat wrapped lines and regular
+g+$ - end of visual line
+g+q - split long lines
+J - join split lines with space
+g+J - joing split lines without space
+
+g+u - uncapitalise
+g+U - capitalise
+g+~ - toggle
+
+g+v - jump back to any previously selected text
+
+FILES
+use :find to find files to open
+use :b to find but only search open buffers
+
+g+f - follow file name and open
+^ - return from file
+
+TAGS
+with tags we can use ^] to follow the tag under the cursor
+use g^] to find an ambiguous tag
+ust ^t to jump back up tag stack
+
+AUTOCOMPLETE
+^x^n for just this file
+^x^f for file names
+^x^] for tags
+^x^l autocomplete whole line
+^n for anything complete
+^e to cancel insert without leaving insert mode
+
+^x^z cancel completion
+^n again or ^p for next and previous in complete options
+use :help ins-complete for more options
+
+FILE BROSWING
+opening a folder using :edit will start netrw
+
+find docs using :help netrw-browse-maps
+
+SNIPPETS
+remaps in vimrc
+snippet files in .vim folder
+
+WINDOW MANAGEMENT
+^z to background any process
+use '$ fg' to bring it back up
+
+
