@@ -58,7 +58,9 @@ _start:
 	int 0x80
 
 	; check name
-	mov edx, uinput_len
+	dec eax ; remove newline
+	cmp eax, 5
+	jg silly_name
 
 nice_name:
 	; make call to function
