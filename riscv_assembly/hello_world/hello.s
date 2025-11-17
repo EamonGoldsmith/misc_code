@@ -22,6 +22,9 @@ loop:
     addi t1, t1, 1
     j loop
 
+halt:
+    j halt
+
 .section .rodata
 hello_str:
     .string "Hello, RISC-V RV32I!\n"
