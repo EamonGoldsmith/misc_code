@@ -140,6 +140,11 @@ void render(float time, state_t *state)
 	glUniform3f(glGetUniformLocation(shader_program, "light.diffuse"), 0.2f, 0.2f, 0.2f);
 	glUniform3f(glGetUniformLocation(shader_program, "light.specular"), 1.0f, 1.0f, 1.0f);
 
+	glUniform1f(glGetUniformLocation(shader_program, "light.constant"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader_program, "light.linear"), 0.09f);
+	glUniform1f(glGetUniformLocation(shader_program, "light.quadratic"), 0.032f);
+
+
 	// set other uniforms
 	glUniform1f(glGetUniformLocation(shader_program, "Time"), time/10.0);
 	glUniform3f(glGetUniformLocation(shader_program, "viewPos"), camera.pos[0], camera.pos[1], camera.pos[2]);
@@ -152,10 +157,9 @@ void render(float time, state_t *state)
 		glm_mat4_dup(GLM_MAT4_IDENTITY, model);
 		
 		extern vec3 cube_positions[];
-		vec3 offset = {cube_positions[i][0], cube_positions[i][1], cube_positions[i][2]};
-		glm_translate(model, offset);
+		glm_translate(model, cube_positions[i]);
 
-		float angle = (i * 20.0) * (time / 3000.0);
+		float angle = (i * 20.0f) * (time / 3000.0f);
 		glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
 		
 		glUniformMatrix4fv(glGetUniformLocation(shader_program, "model"), 1, GL_FALSE, &model[0][0]);
