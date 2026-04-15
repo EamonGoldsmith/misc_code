@@ -14,7 +14,7 @@ class vec2d():
     def add(self, v):
         self.x = self.x + v.x
         self.y = self.y + v.y
-        return (self.x self.y)
+        return (self.x, self.y)
 
     def sub(self, v):
         self.x = self.x - v.x

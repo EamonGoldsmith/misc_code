@@ -17,11 +17,6 @@ struct map_element
 	func_sig ptr;
 };
 
-void generic()
-{
-	printf("command not matched");
-}
-
 int search_elements(struct map_element elements[], struct babel_msg msg)
 {
 	int matched = 0;
@@ -34,7 +29,7 @@ int search_elements(struct map_element elements[], struct babel_msg msg)
 	}
 
 	if (!matched) {
-		generic();
+		printf("command not matched");
 	}
 
 	return 0;
