@@ -7,7 +7,6 @@
 #include <GL/glew.h>
 #include <cglm/cglm.h>
 
-#include <cglm/mat4.h>
 #include <stdio.h>
 
 GLuint shader_program, cubeVBO, cubeVAO;
@@ -20,6 +19,7 @@ texture_t diffuse_map;
 texture_t specular_map;
 texture_t emission_map;
 
+// contains hardcoded cube mesh
 #include "cube.h"
 
 int start_renderer(const int width, const int height)
@@ -53,9 +53,17 @@ void compile_shaders()
 	}
 
 	// load textures
-	(void) load_texture("assets/crate_diffuse.png", &diffuse_map, GL_RGBA);
-	(void) load_texture("assets/crate_specular.png", &specular_map, GL_RGBA);
-	(void) load_texture("assets/matrix.jpg", &emission_map, GL_RGB);
+	if (!load_texture("assets/crate_diffuse.png", &diffuse_map, GL_RGBA)) {
+		fprintf(stderr, "failed to load crate texture\n");
+	}
+
+	if (!load_texture("assets/crate_specular.png", &specular_map, GL_RGBA)) {
+		fprintf(stderr, "failed to load spec texture\n");
+	}
+
+	if (!load_texture("assets/matrix.jpg", &emission_map, GL_RGB)) {
+		fprintf(stderr, "failed to load mat texture\n");
+	}
 }
 
 void setup_buffers()
@@ -136,11 +144,11 @@ void render(float time, state_t *state)
 
 	// set light properties
 	glUniform3f(glGetUniformLocation(shader_program, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
-	glUniform3f(glGetUniformLocation(shader_program, "light.ambient"), 0.1f, 0.1f, 0.1f);
+	glUniform3f(glGetUniformLocation(shader_program, "light.ambient"), 0.5f, 0.5f, 0.5f);
 	glUniform3f(glGetUniformLocation(shader_program, "light.diffuse"), 0.2f, 0.2f, 0.2f);
 	glUniform3f(glGetUniformLocation(shader_program, "light.specular"), 1.0f, 1.0f, 1.0f);
 
-	glUniform1f(glGetUniformLocation(shader_program, "light.constant"), 1.0f);
+	glUniform1f(glGetUniformLocation(shader_program, "light.constant"), 0.5f);
 	glUniform1f(glGetUniformLocation(shader_program, "light.linear"), 0.09f);
 	glUniform1f(glGetUniformLocation(shader_program, "light.quadratic"), 0.032f);
 
@@ -182,9 +190,9 @@ void render(float time, state_t *state)
 
 	// set light properties
 	glUniform3f(glGetUniformLocation(light_source, "light.position"), light_pos[0], light_pos[1], light_pos[2]);
-	glUniform3f(glGetUniformLocation(light_source, "light.ambient"), 0.1f, 0.1f, 0.1f);
-	glUniform3f(glGetUniformLocation(light_source, "light.diffuse"), 1.0f, 1.0f, 1.0f);
-	glUniform3f(glGetUniformLocation(light_source, "light.specular"), 1.0f, 1.0f, 1.0f);
+	glUniform3f(glGetUniformLocation(light_source, "light.ambient"), 0.1f, 0.1f, 1.0f);
+	glUniform3f(glGetUniformLocation(light_source, "light.diffuse"), 0.3f, 0.3f, 1.0f);
+	glUniform3f(glGetUniformLocation(light_source, "light.specular"), 0.3f, 0.3f, 1.0f);
 
 	glUniformMatrix4fv(glGetUniformLocation(light_source, "projection"), 1, GL_FALSE, &projection[0][0]);
 	glUniformMatrix4fv(glGetUniformLocation(light_source, "view"), 1, GL_FALSE, &view[0][0]);

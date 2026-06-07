@@ -20,6 +20,7 @@ int create_shader_program(unsigned int *shader, char *vertex_file, char *frag_fi
 	char *vertex_src = read_shader_file(vertex_file);
 	char *frag_src = read_shader_file(frag_file);
 
+	// debug print source
 	//printf("vertex code: \n%s\n", vertex_src);
 	//printf("fragment code: \n%s\n", frag_src);
 

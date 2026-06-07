@@ -1,6 +1,13 @@
 #version 330 core
 out vec4 FragColor;
 
+in vec3 Normal;  
+in vec3 FragPos;
+in vec2 TexCoords;
+
+uniform float Time;
+uniform vec3 viewPos;
+
 struct Material
 {
     sampler2D diffuse;
@@ -8,6 +15,7 @@ struct Material
     sampler2D emission;
     float shininess;
 };
+uniform Material material;
 
 struct PointLight
 {
@@ -21,6 +29,8 @@ struct PointLight
     vec3 diffuse;
     vec3 specular;
 };
+uniform PointLight light;
+
 #define NR_POINT_LIGHTS 4
 PointLight pointLights[NR_POINT_LIGHTS];
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
@@ -57,7 +67,7 @@ struct DirLight
 {
     vec3 direction;
 
-    vec3 ambient
+    vec3 ambient;
     vec3 diffuse;
     vec3 specular;
 };
@@ -83,31 +93,21 @@ vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir)
     return (ambient + diffuse + specular);
 }
 
-in vec3 Normal;  
-in vec3 FragPos;
-in vec2 TexCoords;
-
-uniform float Time;
-uniform vec3 viewPos;
-uniform Material material;
-uniform Light light;
-
 void main()
 {
     // properties
     vec3 norm = normalize(Normal);
-    vec3 viewDir = normailze(viewPos - FragPos);
+    vec3 viewDir = normalize(viewPos - FragPos);
 
     // directional lighting
     vec3 result = CalcDirLight(dirLight, norm, viewDir);
 
     // point lights
     for (int i = 0; i < NR_POINT_LIGHTS; i++) {
-        result += CalcPointLight(PointLights[i], norm, FragPos, viewDir);
+        result += CalcPointLight(pointLights[i], norm, FragPos, viewDir);
     }
 
     // spot light
-    //...
 
     FragColor = vec4(result, 1.0);
 }
