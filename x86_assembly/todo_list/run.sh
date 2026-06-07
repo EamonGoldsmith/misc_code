@@ -1,3 +1,3 @@
-nasm -f elf -o main.o main.asm
-ld -m elf_i386 -s -o main main.o
-./main
+nasm -g -f elf64 -o main.o main.asm
+ld -o todo main.o -g
+./todo list
