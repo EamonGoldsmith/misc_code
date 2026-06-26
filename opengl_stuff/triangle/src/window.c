@@ -75,7 +75,7 @@ int open_window()
 	// create opengl context
 	int num_fb = 0;
 	GLXFBConfig *fbc = glXChooseFBConfig(display, DefaultScreen(display),
-			visual_attribs, &num_fb);
+		visual_attribs, &num_fb);
 
 	if (!fbc) {
 		fprintf(stderr, "glXChooseFBConfig() failed\n");
@@ -102,7 +102,7 @@ int open_window()
 
 	// create modern opengl context
 	ctx = glXCreateContextAttribsARB(display, fbc[0], NULL, true,
-						context_attribs);
+		context_attribs);
 
 	if (!ctx) {
 		printf("Failed to create OpenGL context. Exiting.\n");
@@ -139,7 +139,7 @@ void close_window()
 	glXMakeCurrent(display, None, NULL);
 	glXDestroyContext(display, ctx);
 
-	// close window
+		// close window
 	XDestroyWindow(display, window);
 	XCloseDisplay(display);
 }

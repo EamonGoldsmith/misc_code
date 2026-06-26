@@ -22,6 +22,7 @@ int main(int argc, char *argv[])
 
 	// game loop
 	state_t state;
+	state.running = 1;
 	while (state.running) {
 		poll_events(&state);
 		render();
