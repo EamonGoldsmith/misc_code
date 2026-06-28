@@ -3,5 +3,5 @@
 version = 4
 
 [[package]]
-name = "risky"
+name = "assembler_8080"
 version = "0.1.0"
