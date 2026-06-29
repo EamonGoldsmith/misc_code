@@ -6,28 +6,27 @@ use std::{
 };
 
 fn print_usage() {
-    println!("idk");
+    println!("usage: ./as input.s output.hex");
 }
 
 fn main() {
     let config = Config::build(env::args()).unwrap_or_else(|err| {
-        eprintln!("Incorrect arguments: {err}");
+        eprintln!("incorrect arguments: {err}");
         print_usage();
         process::exit(1);
     });
 
-    println!("Assembling: {}", config.input);
-    println!("Into: {}", config.output);
+    println!("assembling: {}", config.input);
+    println!("into: {}", config.output);
 
     if let Err(e) = run(config) {
-        eprintln!("Assembler error: {e}");
+        eprintln!("assembler error: {e}");
         process::exit(1);
     }
 }
 
 fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.input)?;
-
 
     Ok(())
 }
@@ -45,7 +44,7 @@ impl Config {
 
         let input = match args.next() {
             Some(arg) => arg.to_string(),
-            None => return Err("Didn't get an input file"),
+            None => return Err("no input files"),
         };
 
         // output out.hex if no name is provided
