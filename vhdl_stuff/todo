@@ -1,7 +1,7 @@
 hello world - DONE
 test build system and libraries
 
-4-bit adder
+4-bit adder - DONE
 5 bit result, addition
 
 4-bit register
@@ -18,15 +18,15 @@ clock divider
 lowers a clock frequency
 
 simple counter
-4 bit counter then reset
+16 bit counter then reset
 
 comparator
-two 4 bit numbers, LT, GT, ET, OT
+two 16 bit numbers, LT, GT, ET, OT
 
 multiplier
-two 4 bit numbers to make 8 bit result
+two 16 bit numbers to make 8 bit result
 
-4-bit ALU
+16-bit ALU
 combine the comparator, multiplier and adder
 to make a reasonbaly functional ALU.
-should have 4 bit instruction and two 4 bit inputs.
+should have 8 bit instruction and two 8 bit inputs.
