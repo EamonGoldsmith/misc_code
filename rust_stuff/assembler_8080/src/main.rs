@@ -47,7 +47,7 @@ impl Config {
             None => return Err("no input files"),
         };
 
-        // output out.hex if no name is provided
+        // Output out.hex if no name is provided
         let output = match args.next() {
             Some(arg) => arg.to_string(),
             None => "out.hex".to_string(),

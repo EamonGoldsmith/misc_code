@@ -1,4 +1,5 @@
 use crate::register::{ Register, RegisterPair };
+use std::collections::HashMap;
 
 /*
     Every "Code" Instrucion is represented here, that is, every instruction
@@ -58,7 +59,7 @@ pub enum Instruction<'a> {
     HLT,
 }
 
-impl Instruction<'_> {
+impl<'a> Instruction<'_> {
     /*
         Parse expects a slice 'line' like "ADD A B" or "ORA (1 << 3)"
         and will produce the Instruction corresponding to the line.
@@ -70,7 +71,7 @@ impl Instruction<'_> {
 
         let mnemonic = iter
             .next()
-            .expect("Instruction empty");
+            .expect("instruction empty");
 
         let arguments: Vec<_> = iter
             .into_iter()
@@ -82,7 +83,7 @@ impl Instruction<'_> {
                 let register = Register::parse(arguments[0])?;
                 Instruction::ORA(register)
             },
-            "NOP" => { Instruction::NOP },
+            "NOP" => Instruction::NOP,
             "MOV" => {
                 let dst = Register::parse(arguments[0])?;
                 let src = Register::parse(arguments[1])?;
@@ -99,18 +100,18 @@ impl Instruction<'_> {
             "LXI" => {
                 let pair = RegisterPair::parse(arguments[0])?;
                 let immediate = arguments[1].parse::<u16>()
-                    .expect("Failed to parse 16-bit immediate");
+                    .expect("failed to parse 16-bit immediate");
                 Instruction::LXI(pair, immediate)
             },
             "MVI" => {
                 let register = Register::parse(arguments[0])?;
                 let immediate = arguments[1].parse::<u8>()
-                    .expect("Failed to parse 16-bit immediate");
+                    .expect("failed to parse 8-bit immediate");
                 Instruction::MVI(register, immediate)
             },
             "STA" => {
                 let immediate = arguments[0].parse::<u16>()
-                    .expect("Failed to parse 16-bit immediate");
+                    .expect("failed to parse 16-bit immediate");
                 Instruction::STA(immediate)
             },
             "JMP" => {
@@ -122,16 +123,16 @@ impl Instruction<'_> {
             "CALL" => {
                 Instruction::CALL(arguments[0])
             },
-            "RET" => { Instruction::RET },
-            "RST" => { Instruction::RST },
+            "RET" => Instruction::RET,
+            "RST" => Instruction::RST,
             "OUT" => {
                 let device = arguments[1].parse::<u8>()
-                    .expect("Failed to parse 8-bit immediate");
+                    .expect("failed to parse 8-bit immediate");
                 Instruction::OUT(device)
             },
-            "HLT" => { Instruction::HLT },
+            "HLT" => Instruction::HLT,
 
-            _ => return Err(format!("Unrecognised Mnemonic: {}", mnemonic)),
+            _ => return Err(format!("unrecognised mnemonic: {}", mnemonic)),
         };
 
         Ok(instruction)
@@ -141,28 +142,55 @@ impl Instruction<'_> {
         will also evaluate any expressions in operands in this step.
         Returns Err and message if Expression fails to resolve.
     */
-    fn emit(&self) -> Result<Vec<u8>, String> {
+    fn emit(&self, symbols: HashMap<&'a str, u16>) -> Result<Vec<u8>, String> {
         let hex = match self {
-            Instruction::ORA(reg) => { vec![0x83 | reg.emit()] },
-            Instruction::NOP => { vec![0u8, 0u8] },
-            Instruction::MOV(dst, src) => { },
-            Instruction::ADD(reg) => { vec![0x80 | reg.emit()] },
-            Instruction::DCX(rp) => {},
-            Instruction::LXI(rp, addr) => {},
-            Instruction::MVI(reg, val) => {},
-            Insturction::STA(valx) => {},
-            Instruction::JMP(sym),
-            Instruction::JNZ(sym),
-            Instruction::CALL(sym),
-            Instruction::RET => {},
-            Instruction::RST => {},
-            Instruction::OUT(dev) => {},
-            Instruction::HLT => {},
+            Instruction::ORA(reg) => vec![0x83u8 | reg.emit()],
+            Instruction::NOP => vec![0x00u8],
+            Instruction::MOV(dst, src) => vec![
+                0x00u8 | (dst.emit() << 3) | src.emit()
+            ],
+            Instruction::ADD(reg) => vec![0x80u8 | reg.emit()],
+            Instruction::DCX(rp) => vec![0x00u8 | (rp.emit() << 4) | 0x0Bu8],
+            Instruction::LXI(rp, valx) => vec![
+                0x01 | (rp.emit() << 4),
+                (valx & 0x00FFu16).try_into().unwrap(),
+                ((valx & 0xFF00u16) >> 8).try_into().unwrap()
+            ],
+            Instruction::MVI(_reg, _val) => vec![0x00],
+            Instruction::STA(_valx) => vec![0x00],
+            Instruction::JMP(_sym) => vec![0x00],
+            Instruction::JNZ(_sym) => vec![0x00],
+            Instruction::CALL(_sym) => vec![0x00],
+            Instruction::RET => vec![0x00],
+            Instruction::RST => vec![0x00],
+            Instruction::OUT(_dev) => vec![0x00],
+            Instruction::HLT => vec![0x00],
 
             _ => return Err(format!("unhandled instruction: {:?}", self)),
         };
 
         Ok(hex)
+    }
+
+    // return the size in bytes of the instruction
+    pub fn size(&self) -> u16 {
+        match self {
+            Instruction::ORA(_) => 1,
+            Instruction::NOP => 1,
+            Instruction::MOV(_, _) => 1,
+            Instruction::ADD(_) => 1,
+            Instruction::DCX(_) => 1,
+            Instruction::LXI(_, _) => 3,
+            Instruction::MVI(_, _) => 2,
+            Instruction::STA(_) => 3,
+            Instruction::JMP(_) => 3,
+            Instruction::JNZ(_) => 3,
+            Instruction::CALL(_) => 3,
+            Instruction::RET => 1,
+            Instruction::RST => 1,
+            Instruction::OUT(_) => 1,
+            Instruction::HLT => 1,
+        }
     }
 }
 
@@ -200,19 +228,19 @@ mod instruction_parse {
     }
 
     #[test]
-    #[should_panic(expected = "Instruction empty")]
+    #[should_panic(expected = "instruction empty")]
     fn empty_input() {
         let _ = Instruction::parse("").unwrap();
     }
 
     #[test]
-    #[should_panic(expected = "Unknown Register: 9")]
+    #[should_panic(expected = "unknown register: 9")]
     fn invalid_register() {
         let _ = Instruction::parse("ADD 9").unwrap();
     }
 
     #[test]
-    #[should_panic(expected = "Unrecognised Mnemonic: ABOBA")]
+    #[should_panic(expected = "unrecognised mnemonic: ABOBA")]
     fn invalid_mnemonic() {
         let _ = Instruction::parse("ABOBA PSW").unwrap();
     }
