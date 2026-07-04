@@ -142,7 +142,7 @@ impl<'a> Instruction<'_> {
         will also evaluate any expressions in operands in this step.
         Returns Err and message if Expression fails to resolve.
     */
-    fn emit(&self, symbols: HashMap<&'a str, u16>) -> Result<Vec<u8>, String> {
+    fn emit(&self, labels: HashMap<&'a str, u16>) -> Result<Vec<u8>, String> {
         let hex = match self {
             Instruction::ORA(reg) => vec![0x83u8 | reg.emit()],
             Instruction::NOP => vec![0x00u8],
@@ -166,7 +166,7 @@ impl<'a> Instruction<'_> {
             Instruction::OUT(_dev) => vec![0x00],
             Instruction::HLT => vec![0x00],
 
-            _ => return Err(format!("unhandled instruction: {:?}", self)),
+            //_ => return Err(format!("unhandled instruction: {:?}", self)),
         };
 
         Ok(hex)
@@ -234,7 +234,7 @@ mod instruction_parse {
     }
 
     #[test]
-    #[should_panic(expected = "unknown register: 9")]
+    #[should_panic(expected = "unrecognised register: 9")]
     fn invalid_register() {
         let _ = Instruction::parse("ADD 9").unwrap();
     }
@@ -252,7 +252,13 @@ mod instruction_evaluate {
     
     #[test]
     fn add() {
-        let hex: Vec<u8> = Instruction::ADD(Register::B).emit().unwrap();
+        // Test doesn't use any symbols so pass empty shmap
+        let symbols = HashMap::new();
+
+        let hex: Vec<u8> = Instruction::ADD(Register::B)
+            .emit(symbols)
+            .unwrap();
+
         assert_eq!(vec![0x80], hex);
     }
 }
