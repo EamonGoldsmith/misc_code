@@ -1,10 +1,7 @@
-
 pub mod register;
 pub mod instruction;
-pub mod expression;
 pub mod program;
 
-pub fn assemble() {
-
+pub fn assemble(contents: &str) -> Result<(), String> {
+    Ok(())
 }
-
