@@ -35,13 +35,24 @@
 #endif
 
 #define IPV6_STRING_LENGTH 40
+#define SOCKET_BLOCKING (0)
+#define SOCKET_NONBLOCKING (1)
+#define MAX_CLIENTS (10)
 
+// required for windows 
 int cross_init();
-socket_t cross_connect(char *address, unsigned int port);
-int cross_send(socket_t *sock, char *buffer, size_t len);
-int cross_recv(socket_t *sock, char *buffer, size_t *len);
-void cross_close(socket_t *sock);
-int cross_resolve(socket_t *sock, char *hostname, char *address);
 void cross_cleanup();
+
+// server
+socket_t cross_server(unsigned int port);
+socket_t cross_accept(socket_t server_sock);
+
+// client
+socket_t cross_connect(const char *address, unsigned int port);
+
+// basic
+int cross_send(socket_t sock, const char *buffer, size_t len);
+int cross_recv(socket_t sock, const char *buffer, size_t len);
+void cross_close(socket_t sock);
 
 #endif // CROSS_SOCKET_H_
