@@ -7,7 +7,7 @@
 
 #include <windows.h>
 
-typedef comport_t char*;
+typedef char* comport_t;
 
 #define INVALID_COMPORT INVALID_HANDLE_VALUE
 #define IS_VALID_COMPORT(port) (port != INVALID_COMPORT)
@@ -17,7 +17,7 @@ typedef comport_t char*;
 
 #include <string.h>
 
-typedef comport_t int;
+typedef int comport_t;
 
 #define INVALID_COMPORT (-1)
 #define IS_VALID_COMPORT(port) (port > 0)
@@ -43,6 +43,6 @@ void serial_close(comport_t port);
 void serial_break(comport_t port, int delay_ms);
 
 // send string to port, must be null terminated string
-void serial_cputs(comport_t port, const char *string);
+int serial_cputs(comport_t port, const char *string);
 
 #endif // SERIAL_H_

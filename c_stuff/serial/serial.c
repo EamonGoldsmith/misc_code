@@ -308,7 +308,7 @@ comport_t serial_open(const char *devname, int baudrate, const char *mode, int f
 
 int serial_poll(comport_t port, unsigned char *buf, int size)
 {
-	int n = read(port_num, buf, size);
+	int n = read(port, buf, size);
 	if(n < 0) {
 		if(errno == EAGAIN) return SERIAL_ERROR;
 	}
@@ -337,7 +337,7 @@ int serial_send_byte(comport_t port, unsigned char byte)
 
 int serial_send_buf(comport_t port, unsigned char *buf, int size)
 {
-	int n = write(port_num, buf, size);
+	int n = write(port, buf, size);
 	return (n > -1 ? SERIAL_OK : SERIAL_ERROR);
 }
 
@@ -383,7 +383,9 @@ void serial_break(comport_t port, int delay_ms)
 
 #endif
 
-void serial_cputs(comport_t port, const char *text)
+int serial_cputs(comport_t port, const char *string)
 {
-	while (*text != 0) serial_send_byte(port, *(text++));
+	if (string == NULL) return SERIAL_ERROR;
+	while (*string != 0) if (serial_send_byte(port, *(string++)) == SERIAL_ERROR) return SERIAL_ERROR;
+	return SERIAL_OK;
 }
