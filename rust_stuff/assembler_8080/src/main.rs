@@ -1,9 +1,5 @@
-use std::{
-    env,
-    fs,
-    process,
-    error::Error,
-};
+use std::{ env, fs, process, error::Error };
+use assembler_8080::assemble;
 
 fn print_usage() {
     println!("usage: ./as input.s output.hex");
@@ -27,6 +23,12 @@ fn main() {
 
 fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.input)?;
+    
+    if let Ok(hex) = assemble(&contents) {
+        println!("{:?}", hex);
+    };
+
+
 
     Ok(())
 }
@@ -47,7 +49,7 @@ impl Config {
             None => return Err("no input files"),
         };
 
-        // output out.hex if no name is provided
+        // Output out.hex if no name is provided
         let output = match args.next() {
             Some(arg) => arg.to_string(),
             None => "out.hex".to_string(),
