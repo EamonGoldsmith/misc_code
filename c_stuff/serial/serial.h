@@ -3,22 +3,46 @@
 
 #include <stddef.h>
 
-// open devname, with settings given, return a port reference number
-size_t serial_open(const char *devname, int baudrate, const char *mode,
-	int flowctrl);
+#ifdef _WIN32
 
-// take port, buffer and size, return number of bytes writen to buffer
-int serial_poll(size_t port_num, unsigned char *buf, int size);
+#include <windows.h>
 
-void serial_flush(size_t port_num);
-int serial_send_byte(size_t port_num, unsigned char byte);
-int serial_send_buf(size_t port_num, unsigned char *buf, int size);
-void serial_close(size_t port_num);
+typedef comport_t char*;
+
+#define INVALID_COMPORT INVALID_HANDLE_VALUE
+#define IS_VALID_COMPORT(port) (port != INVALID_COMPORT)
+#define GET_SERIAL_ERROR() GetLastError()
+
+#else
+
+#include <string.h>
+
+typedef comport_t int;
+
+#define INVALID_COMPORT (-1)
+#define IS_VALID_COMPORT(port) (port > 0)
+#define GET_SERIAL_ERROR() strerror(errno)
+
+#endif
+
+#define SERIAL_ERROR (-1)
+#define SERIAL_OK (1)
+
+comport_t serial_open(
+	const char *devname, int baudrate, const char *mode, int flowctrl
+);
+
+int serial_poll(comport_t port, unsigned char *buf, int size);
+
+void serial_flush(comport_t port);
+int serial_send_byte(comport_t port, unsigned char byte);
+int serial_send_buf(comport_t port, unsigned char *buf, int size);
+void serial_close(comport_t port);
+
+// blocking function!
+void serial_break(comport_t port, int delay_ms);
 
 // send string to port, must be null terminated string
-void serial_cputs(size_t port_num, const char *text);
-
-// send a break for delay_ms, blocking, will stop break after time finish.
-void serial_break(size_t port_num, int delay_ms);
+void serial_cputs(comport_t port, const char *string);
 
 #endif // SERIAL_H_

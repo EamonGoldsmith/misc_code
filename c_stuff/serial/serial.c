@@ -1,10 +1,131 @@
 #include "serial.h"
-#include "log.h"
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <string.h>
+
+#if _WIN32
+
+comport_t serial_open(
+	const char *devname, int baudrate, const char *mode, int flowctrl
+) {
+	char mode_str[512];
+	sprintf(mode_str,
+		"baud=%i data=%i parity=%c stop=%i xon=off to=off odsr=off dtr=on rts=%s",
+baudrate, mode[0] - '0', mode[1], mode[2] - '0',
+		flowctrl ? "on" : "off");
+
+	DEBUG_LOG("mode_str: %s", mode_str);
+
+	// devname must have form "\\\\.\\COMX"
+	comport_t port = CreateFileA(devname, 
+		GENERIC_READ | GENERIC_WRITE,
+		0,
+		NULL,
+		OPEN_EXISTING,
+		0,
+		NULL);
+
+	if (port == INVALID_HANDLE_VALUE) {
+		fprintf(stderr, "unable to open port: %s", devname);
+		return INVALID_COMPORT;
+	}
+
+	DCB port_settings;
+	memset(&port_settings, 0, sizeof(port_settings));
+	port_settings.DCBlength = sizeof(port_settings);
+
+	if (!BuildCommDCBA(mode_str, &port_settings)) {
+		fprintf(stderr, "failed to set port DCB settings");
+		CloseHandle(port);
+		return INVALID_COMPORT;
+	}
+
+	if (flowctrl) {
+		port_settings.fOutxCtsFlow = TRUE;
+		port_settings.fRtsControl = RTS_CONTROL_HANDSHAKE;
+	}
+ 
+	if (!SetCommState(port, &port_settings)) {
+		ERR_LOG("failed to set port settings");
+		CloseHandle(port);
+		return INVALID_COMPORT;
+	}
+
+	COMMTIMEOUTS Cptimeouts;
+	Cptimeouts.ReadIntervalTimeout = MAXDWORD;
+	Cptimeouts.ReadTotalTimeoutMultiplier = 0;
+	Cptimeouts.ReadTotalTimeoutConstant = 0;
+	Cptimeouts.WriteTotalTimeoutMultiplier = 0;
+	Cptimeouts.WriteTotalTimeoutConstant = 0;
+
+	if (!SetCommTimeouts(port, &Cptimeouts)) {
+		ERR_LOG("failed to set port timeout");
+		CloseHandle(port);
+		return INVALID_COMPORT;
+	}
+
+	return port;
+}
+
+int serial_poll(comport_t port, unsigned char *buf, int size)
+{
+	int n;
+
+	if (!ReadFile(port, buf, size, (LPDWORD)(&n), NULL)) {
+		return SERIAL_ERROR;
+	}
+
+	return n;
+}
+
+void serial_flush(comport_t port)
+{
+	PurgeComm(port, PURGE_RXCLEAR | PURGE_RXABORT);
+	PurgeComm(port, PURGE_TXCLEAR | PURGE_TXABORT);
+}
+
+int serial_send_byte(comport_t port, unsigned char byte)
+{
+	int n;
+
+	if (!WriteFile(port, &byte, 1, (LPDWORD)(&n), NULL)) {
+		return SERIAL_ERROR;
+	}
+
+	return (n > -1 ? SERIAL_OK : SERIAL_ERROR);
+}
+
+int serial_send_buf(comport_t port, unsigned char *buf, int size)
+{
+	int n;
+
+	if (!WriteFile(port, buf, size, (LPDWORD)(&n), NULL)) {
+		return SERIAL_ERROR;
+	}
+
+	return (n > -1 ? SERIAL_OK : SERIAL_ERROR);
+}
+
+void serial_close(comport_t port)
+{
+	CloseHandle(port);
+}
+
+void serial_break(comport_t port, int delay_ms)
+{
+	if (!SetCommBreak(port)) {
+		fprintf(stderr, "failed to set break");
+	}
+
+	Sleep(1);
+
+	if (!ClearCommBreak(port)) {
+		fprintf(stderr, "failed to clear break");
+	}
+}
+
+#else
 #include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -12,35 +133,22 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-
-#if defined(__linux__)
 #include <linux/serial.h>
 #include <sys/ioctl.h>
 #include <termios.h>
-#else
-#include <windows.h>
-#endif
 
 // man 3 termios
 // man 4 tty_ioctl
 
-size_t serial_open(const char *devname, int baudrate, const char *mode, int flowctrl)
+comport_t serial_open(const char *devname, int baudrate, const char *mode, int flowctrl)
 {
-	size_t port_num;
-
-#if defined(__linux__)
-	int err,
-		baudr,
-		status;
-
-	int cbits=CS8,
-		cpar=0,
-		ipar=IGNPAR,
-		bstop=0;
+	comport_t port;
+	int err, baudr, status;
+	int cbits=CS8, cpar=0, ipar=IGNPAR, bstop=0;
 
 	if (strlen(mode) != 3) {
-		ERR_LOG("invalid mode");
-		return 0;
+		fprintf(stderr, "invalid mode");
+		return INVALID_COMPORT;
 	}
 
 	// data bits
@@ -58,8 +166,8 @@ size_t serial_open(const char *devname, int baudrate, const char *mode, int flow
 		cbits = CS5;
 		break;
 	default:
-		ERR_LOG("invalid number of data-bits");
-		return 0;
+		fprintf(stderr, "invalid number of data-bits");
+		return INVALID_COMPORT;
 	}
 
 	// partiy
@@ -81,8 +189,8 @@ size_t serial_open(const char *devname, int baudrate, const char *mode, int flow
 		ipar = INPCK;
 		break;
 	default:
-		ERR_LOG("invalid parity");
-		return 0;
+		fprintf(stderr, "invalid parity");
+		return INVALID_COMPORT;
 	}
 
 	// stop bits
@@ -94,34 +202,34 @@ size_t serial_open(const char *devname, int baudrate, const char *mode, int flow
 		bstop = CSTOPB;
 		break;
 	default:
-		ERR_LOG("invalid number of stop bits");
-		return 0;
+		fprintf(stderr, "invalid number of stop bits");
+		return INVALID_COMPORT;
 	}
 
-	port_num = open(devname, O_RDWR | O_NOCTTY | O_NDELAY);
+	port = open(devname, O_RDWR | O_NOCTTY | O_NDELAY);
 	
-	if (port_num == -1) {
+	if (port == -1) {
 		perror("unable to open comport");
-		return 0;
+		return INVALID_COMPORT;
 	}
 
 	// lock access so that another process can't also use the port
-	if (flock(port_num, LOCK_EX | LOCK_NB) != 0) {
-		close(port_num);
+	if (flock(port, LOCK_EX | LOCK_NB) != 0) {
+		close(port);
 		perror("another process has locked the comport");
-		return 0;
+		return INVALID_COMPORT;
 	}
 
 	struct termios old_port_settings;
 	struct termios new_port_settings;
 
 	// backup port settings
-	err = tcgetattr(port_num, &old_port_settings);
+	err = tcgetattr(port, &old_port_settings);
 	if (err==-1) {
-		close(port_num);
-		flock(port_num, LOCK_UN); // free the port so that others can use it.
+		close(port);
+		flock(port, LOCK_UN); // free the port so that others can use it.
 		perror("unable to read portsettings");
-		return 0;
+		return INVALID_COMPORT;
 	}
 
 	// clear struct
@@ -144,41 +252,41 @@ size_t serial_open(const char *devname, int baudrate, const char *mode, int flow
 	new_port_settings.c_cflag |= B38400;
 
 	// set the temporary baudrate and connection settings
-	err = tcsetattr(port_num, TCSANOW, &new_port_settings);
+	err = tcsetattr(port, TCSANOW, &new_port_settings);
 	if (err == -1) {
-		tcsetattr(port_num, TCSANOW, &old_port_settings);
-		close(port_num);
-		flock(port_num, LOCK_UN);
+		tcsetattr(port, TCSANOW, &old_port_settings);
+		close(port);
+		flock(port, LOCK_UN);
 		perror("unable to adjust portsettings");
-		return 0;
+		return INVALID_COMPORT;
 	}
 
 	// update with custom non-standard rate
 	struct serial_struct serial;
-	if (ioctl(port_num, TIOCGSERIAL, &serial) == -1) {
-		tcsetattr(port_num, TCSANOW, &old_port_settings);
-		flock(port_num, LOCK_UN);
+	if (ioctl(port, TIOCGSERIAL, &serial) == -1) {
+		tcsetattr(port, TCSANOW, &old_port_settings);
+		flock(port, LOCK_UN);
 		perror("unable to get portstatus");
-		return 0;
+		return INVALID_COMPORT;
 	}
 	
 	serial.flags &= ~ASYNC_SPD_MASK;
 	serial.flags |= ASYNC_SPD_CUST;
 	serial.custom_divisor = serial.baud_base / baudrate;
 
-	if (ioctl(port_num, TIOCSSERIAL, &serial) == -1) {
-		tcsetattr(port_num, TCSANOW, &old_port_settings);
-		flock(port_num, LOCK_UN);
+	if (ioctl(port, TIOCSSERIAL, &serial) == -1) {
+		tcsetattr(port, TCSANOW, &old_port_settings);
+		flock(port, LOCK_UN);
 		perror("unable to get portstatus");
-		return 0;
+		return INVALID_COMPORT;
 	}
 
 	// get status
-	if (ioctl(port_num, TIOCMGET, &status) == -1) {
-		tcsetattr(port_num, TCSANOW, &old_port_settings);
-		flock(port_num, LOCK_UN);
+	if (ioctl(port, TIOCMGET, &status) == -1) {
+		tcsetattr(port, TCSANOW, &old_port_settings);
+		flock(port, LOCK_UN);
 		perror("unable to get portstatus");
-		return 0;
+		return INVALID_COMPORT;
 	}
 
 	// turn on DTR
@@ -187,154 +295,57 @@ size_t serial_open(const char *devname, int baudrate, const char *mode, int flow
 	status |= TIOCM_RTS;
 
 	// set modem bits
-	if (ioctl(port_num, TIOCMSET, &status) == -1) {
-		tcsetattr(port_num, TCSANOW, &old_port_settings);
-		flock(port_num, LOCK_UN);
+	if (ioctl(port, TIOCMSET, &status) == -1) {
+		tcsetattr(port, TCSANOW, &old_port_settings);
+		flock(port, LOCK_UN);
 		perror("unable to set portstatus");
-		return 0;
+		return INVALID_COMPORT;
 	}
 
-#else
-	char mode_str[512];
-	sprintf(mode_str, "baud=%i data=%i parity=%c stop=%i xon=off to=off odsr=off dtr=on rts=%s",
-		baudrate, mode[0] - '0', mode[1], mode[2] - '0',
-		flowctrl ? "on" : "off");
-
-	DEBUG_LOG("mode_str: %s", mode_str);
-
-	// devname must have form "\\\\.\\COMX"
-	port_num = (size_t)CreateFileA(devname, 
-		GENERIC_READ | GENERIC_WRITE,
-		0,
-		NULL,
-		OPEN_EXISTING,
-		0,
-		NULL);
-
-	if ((void*)port_num == INVALID_HANDLE_VALUE) {
-		ERR_LOG("unable to open port: %s", devname);
-		return 0;
-	}
-
-	DCB port_settings;
-	memset(&port_settings, 0, sizeof(port_settings));
-	port_settings.DCBlength = sizeof(port_settings);
-
-	if (!BuildCommDCBA(mode_str, &port_settings)) {
-		ERR_LOG("failed to set port DCB settings");
-		CloseHandle((void*)port_num);
-		return 0;
-	}
-
-	if (flowctrl) {
-		port_settings.fOutxCtsFlow = TRUE;
-		port_settings.fRtsControl = RTS_CONTROL_HANDSHAKE;
-	}
- 
-	if (!SetCommState((void*)port_num, &port_settings)) {
-		ERR_LOG("failed to set port settings");
-		CloseHandle((void*)port_num);
-		return 0;
-	}
-
-	COMMTIMEOUTS Cptimeouts;
-	Cptimeouts.ReadIntervalTimeout = MAXDWORD;
-	Cptimeouts.ReadTotalTimeoutMultiplier = 0;
-	Cptimeouts.ReadTotalTimeoutConstant = 0;
-	Cptimeouts.WriteTotalTimeoutMultiplier = 0;
-	Cptimeouts.WriteTotalTimeoutConstant = 0;
-
-	if (!SetCommTimeouts((void*)port_num, &Cptimeouts)) {
-		ERR_LOG("failed to set port timeout");
-		CloseHandle((void*)port_num);
-		return 0;
-	}
-#endif
-
-	return port_num;
+	return port;
 }
 
 
-int serial_poll(size_t port_num, unsigned char *buf, int size)
+int serial_poll(comport_t port, unsigned char *buf, int size)
 {
-	int n;
-
-#if defined(__linux__)
-	n = read(port_num, buf, size);
-
+	int n = read(port_num, buf, size);
 	if(n < 0) {
-		if(errno == EAGAIN)  return 0;
+		if(errno == EAGAIN) return SERIAL_ERROR;
 	}
-#else
-	if (!ReadFile((void*)port_num, buf, size, (LPDWORD)((void*)&n), NULL)) {
-		return 0;
-	}
-#endif
 
 	return n;
 }
 
-void serial_flush(size_t port_num)
+void serial_flush(comport_t port)
 {
-#if defined(__linux__)
 	/*
 		options:
 		TCIFLUSH — flush input queue (discard data received but not read).
 		TCOFLUSH — flush output queue (discard data written but not transmitted).
 		TCIOFLUSH — flush both input and output queues.
 	*/
-
-	if (tcflush(port_num, TCIOFLUSH) == -1) {
-		ERR_LOG("failed to flush serial buffer");
+	if (tcflush(port, TCIOFLUSH) == -1) {
+		fprintf(stderr, "failed to flush serial buffer");
 	}
-#else
-	PurgeComm((void*)port_num, PURGE_RXCLEAR | PURGE_RXABORT);
-	PurgeComm((void*)port_num, PURGE_TXCLEAR | PURGE_TXABORT);
-#endif
-
-	return;
 }
 
-int serial_send_byte(size_t port_num, unsigned char byte)
+int serial_send_byte(comport_t port, unsigned char byte)
 {
-	int n;
-
-#if defined(__linux__)
-	n = write(port_num, &byte, 1);
-
-#else
-	if (!WriteFile((void*)port_num, &byte, 1, (LPDWORD)((void*)&n), NULL)) {
-		return 0;
-	}
-
-#endif
-
-	return (n > -1);
+	int n = write(port, &byte, 1);
+	return (n > -1 ? SERIAL_OK : SERIAL_ERROR);
 }
 
-int serial_send_buf(size_t port_num, unsigned char *buf, int size)
+int serial_send_buf(comport_t port, unsigned char *buf, int size)
 {
-	int n;
-
-#if defined(__linux__)
-	n = write(port_num, buf, size);
-
-#else
-	if (!WriteFile((void*)port_num, buf, size, (LPDWORD)((void*)&n), NULL)) {
-		return 0;
-	}
-
-#endif
-
-	return (n > -1);
+	int n = write(port_num, buf, size);
+	return (n > -1 ? SERIAL_OK : SERIAL_ERROR);
 }
 
-void serial_close(size_t port_num)
+void serial_close(comport_t port)
 {
-#if defined(__linux__)
 	int status;
 
-	if (ioctl(port_num, TIOCMGET, &status) == -1) {
+	if (ioctl(port, TIOCMGET, &status) == -1) {
 		perror("unable to get portstatus");
 	}
 
@@ -343,7 +354,7 @@ void serial_close(size_t port_num)
 	/* turn off RTS */
 	status &= ~TIOCM_RTS;
 
-	if (ioctl(port_num, TIOCMSET, &status) == -1) {
+	if (ioctl(port, TIOCMSET, &status) == -1) {
 		perror("unable to set portstatus");
 	}
 
@@ -351,45 +362,28 @@ void serial_close(size_t port_num)
 	// perhaps pass this to user to hold on to.
 	//tcsetattr(port_num, TCSANOW, &old_port_settings);
 	
-	close(port_num);
+	close(port);
 
 	/* free the port so that others can use it. */
-	flock(port_num, LOCK_UN);
-#else
-	CloseHandle((void*)port_num);
-
-#endif
+	flock(port, LOCK_UN);
 }
 
-void serial_break(size_t port_num, int delay_ms)
+void serial_break(comport_t port, int delay_ms)
 {
-#if defined(__linux__)
-	if(ioctl(port_num, TIOCSBRK, NULL) == -1) {
+	if(ioctl(port, TIOCSBRK, NULL) == -1) {
 		perror("unable to turn break on");
 	}
 
 	sleep(1);
 
-	if(ioctl(port_num, TIOCCBRK, NULL) == -1) {
+	if(ioctl(port, TIOCCBRK, NULL) == -1) {
 		perror("unable to turn break off");
 	}
-
-#else
-	if (!SetCommBreak((void*)port_num)) {
-		ERR_LOG("failed to set break");
-	}
-
-	sleep(1);
-
-	if (!ClearCommBreak((void*)port_num)) {
-		ERR_LOG("failed to clear break");
-	}
-
-#endif
 }
 
-// sends a string to serial port
-void serial_cputs(size_t port_num, const char *text)
+#endif
+
+void serial_cputs(comport_t port, const char *text)
 {
-	while (*text != 0) serial_send_byte(port_num, *(text++));
+	while (*text != 0) serial_send_byte(port, *(text++));
 }
