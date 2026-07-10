@@ -15,7 +15,7 @@ comport_t serial_open(
 baudrate, mode[0] - '0', mode[1], mode[2] - '0',
 		flowctrl ? "on" : "off");
 
-	DEBUG_LOG("mode_str: %s", mode_str);
+	printf("mode_str: %s\n", mode_str);
 
 	// devname must have form "\\\\.\\COMX"
 	comport_t port = CreateFileA(devname, 
@@ -27,7 +27,7 @@ baudrate, mode[0] - '0', mode[1], mode[2] - '0',
 		NULL);
 
 	if (port == INVALID_HANDLE_VALUE) {
-		fprintf(stderr, "unable to open port: %s", devname);
+		fprintf(stderr, "unable to open port: %s\n", devname);
 		return INVALID_COMPORT;
 	}
 
@@ -36,7 +36,7 @@ baudrate, mode[0] - '0', mode[1], mode[2] - '0',
 	port_settings.DCBlength = sizeof(port_settings);
 
 	if (!BuildCommDCBA(mode_str, &port_settings)) {
-		fprintf(stderr, "failed to set port DCB settings");
+		fprintf(stderr, "failed to set port DCB settings\n");
 		CloseHandle(port);
 		return INVALID_COMPORT;
 	}
@@ -47,7 +47,7 @@ baudrate, mode[0] - '0', mode[1], mode[2] - '0',
 	}
  
 	if (!SetCommState(port, &port_settings)) {
-		ERR_LOG("failed to set port settings");
+		fprintf(stderr, "failed to set port settings\n");
 		CloseHandle(port);
 		return INVALID_COMPORT;
 	}
@@ -60,7 +60,7 @@ baudrate, mode[0] - '0', mode[1], mode[2] - '0',
 	Cptimeouts.WriteTotalTimeoutConstant = 0;
 
 	if (!SetCommTimeouts(port, &Cptimeouts)) {
-		ERR_LOG("failed to set port timeout");
+		fprintf(stderr, "failed to set port timeout\n");
 		CloseHandle(port);
 		return INVALID_COMPORT;
 	}
@@ -115,13 +115,13 @@ void serial_close(comport_t port)
 void serial_break(comport_t port, int delay_ms)
 {
 	if (!SetCommBreak(port)) {
-		fprintf(stderr, "failed to set break");
+		fprintf(stderr, "failed to set break\n");
 	}
 
 	Sleep(1);
 
 	if (!ClearCommBreak(port)) {
-		fprintf(stderr, "failed to clear break");
+		fprintf(stderr, "failed to clear break\n");
 	}
 }
 
@@ -325,7 +325,7 @@ void serial_flush(comport_t port)
 		TCIOFLUSH — flush both input and output queues.
 	*/
 	if (tcflush(port, TCIOFLUSH) == -1) {
-		fprintf(stderr, "failed to flush serial buffer");
+		fprintf(stderr, "failed to flush serial buffer\n");
 	}
 }
 
