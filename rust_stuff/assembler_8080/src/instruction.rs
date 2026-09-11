@@ -2,7 +2,7 @@ use crate::register::{ Register, RegisterPair };
 use std::collections::HashMap;
 
 /*
-    Every "Code" Instrucion is represented here, that is, every instruction
+    Every "Code" Instruction is represented here, that is, every instruction
     which can eventually be assembled into a byte(s). An instruction will
     always be created with its appropriate operands.
 */
@@ -142,7 +142,7 @@ impl<'a> Instruction<'_> {
         will also evaluate any expressions in operands in this step.
         Returns Err and message if Expression fails to resolve.
     */
-    fn emit(&self, labels: HashMap<&'a str, u16>) -> Result<Vec<u8>, String> {
+    pub fn emit(&self, labels: HashMap<&'a str, u16>) -> Result<Vec<u8>, String> {
         let hex = match self {
             Instruction::ORA(reg) => vec![0x83u8 | reg.emit()],
             Instruction::NOP => vec![0x00u8],
