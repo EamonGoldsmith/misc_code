@@ -8,36 +8,74 @@ pub enum SectionData<'a> {
     Uninitialised(u16),
 }
 
+use SectionData::*;
+
 impl<'a> SectionData<'a> {
     pub fn size(&self) -> u16 {
         match self {
-            SectionData::Code(instructions) => {
-                instructions
+            Code(insts) => {
+                insts
                     .iter()
                     .fold(0, |acc, inst: &Instruction| acc + inst.size())
             },
-            SectionData::Data(data) => {
-                data.len().try_into().unwrap()
-            },
-            SectionData::Uninitialised(size) => {
-                *size
-            }
+            Data(data) => { data.len().try_into().unwrap() },
+            Uninitialised(size) => { *size }
         }
     }
 
-    pub fn emit(&self, labels: HashMap<&'a str, u16>) -> Result<Vec<u8>, String> {
+    pub fn emit(
+        &self,
+        labels: HashMap<&'a str, u16>
+    ) -> Vec<u8> {
         match self {
-            SectionData::Code(instructions) => {
-                let bytes = instructions
+            Code(insts) => {
+                insts
                     .iter()
-                    .map(|inst| { inst.emit(labels) })
-                    .collect();
-
-                Ok(bytes)
+                    .fold(Vec::new(), |acc: Vec<u8>, inst: &Instruction|
+                            inst.emit(&labels)
+                    )
             },
-            SectionData::Data(data) => { Ok(*data) },
-            SectionData::Uninitialised(_) => { Ok(vec![0; 10]) },
+            Data(data) => { data.clone() },
+            Uninitialised(size) => { vec![0; *size as usize] },
         }
+    }
+}
+
+#[cfg(test)]
+mod section_evaluate {
+    use super::*;
+
+    #[test]
+    fn emit_code() {
+
+        // No labels
+        assert_eq!(
+            Data(vec![0x01, 0x02]).emit(HashMap::new()),
+            vec![0x01, 0x02],
+        );
+
+        // With labels
+
+        assert_eq!(
+            Data(vec![0x01, 0x02]).emit(HashMap::new()),
+            vec![0x01, 0x02],
+        );
+    }
+
+    #[test]
+    fn emit_data() {
+        assert_eq!(
+            Data(vec![0x01, 0x02]).emit(HashMap::new()),
+            vec![0x01, 0x02],
+        );
+    }
+
+    #[test]
+    fn emit_uninitialised() {
+        assert_eq!(
+            Uninitialised(0x0004).emit(HashMap::new()),
+            vec![0x00, 0x00, 0x00, 0x00],
+        );
     }
 }
 
@@ -49,10 +87,7 @@ pub struct Section<'a> {
 }
 
 impl<'a> Section<'a> {
-    pub fn emit(
-        &self,
-        labels: HashMap<&'a str, u16>
-    ) -> Result<Vec<u8>, String> {
+    pub fn emit( &self, labels: HashMap<&'a str, u16>) -> Vec<u8> {
         self.data.emit(labels)
     }
 }

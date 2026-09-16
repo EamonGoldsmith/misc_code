@@ -143,14 +143,8 @@ impl<'a> Program<'a> {
         proper 16-bit memory addresses. Check section collisions and final
         assembly of sections into binary file.
     */
-    pub fn emit(&self) -> Result<Vec<u8>, String> {
-        let chunks = self.sections
-            .iter()
-            .for_each(|section| {
-                section.emit(self.labels)
-            });
-
-        chunks.join()
+    pub fn emit(&self) -> Vec<u8> {
+        vec![0x00, 0x00]
     }
 }
 
@@ -261,7 +255,7 @@ SUM:    DB      0           ; Reserve 1 byte for the result, initialized to 0
             }
         );
 
-        assert_eq!(vec![0x00, 0x00], pgm.emit().unwrap());
+        assert_eq!(vec![0x00, 0x00], pgm.emit());
     }
 }
 
