@@ -45,12 +45,16 @@ Hint: One convenient way to make expmod signal is to have it return 0.
 	(and (not (= r 1)) (not (= r (- n 1)))
 		 (= (remainder (square r) n) 1)))
 
+  (define (nontrivial-check r)
+	(if (nontrivial r m)
+	  0	;; no recursion in case of nontrivial square-root found
+	  (remainder (square r) m)))
+
   (cond ((= exp 0) 1)
 		((nontrivial base m) 0)
 		((even? exp)
-		  (remainder
-			(square (expmod base (/ exp 2) m))
-			m))
+		  (nontrivial-check
+			(expmod base (/ exp 2) m)))
 		(else
 		  (remainder
 			(* base (expmod base (- exp 1) m))
