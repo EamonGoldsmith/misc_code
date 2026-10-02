@@ -34,18 +34,30 @@ and compare the results to those of the integral procedure shown above.
 	 dx))
 
 (define (simpson f a b n)
-  (define (next i) (+ a 1))
-  (sum f a next b))
+  (define (h a b n)
+	(/ (- b a) n))
+
+  (define (term k)
+	(cond ((or (= k 0) (= k n))
+		   (f (+ a (* k (h a b n)))))
+		  ((even? k)
+		   (* 2 (f (+ a (* k (h a b n))))))
+		  ((odd? k)
+		   (* 4 (f (+ a (* k (h a b n))))))))
+
+  (define (next k)
+	(+ k 1))
+
+  (* (/ (h a b n) 3)
+	 (sum term 0 next n)))
 
 (display (integral cube 0 1 0.01))
 (newline)
 (display (integral cube 0 1 0.001))
 (newline)
 
-(define (nop a) a)
-
-(display (simpson nop 1 10 100))
+(display (simpson cube 0 1 100))
 (newline)
-;;(display (simpson cube 0 1 1000))
-;;(newline)
+(display (simpson cube 0 1 1000))
+(newline)
 
