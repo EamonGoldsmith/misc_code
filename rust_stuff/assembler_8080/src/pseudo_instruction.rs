@@ -1,8 +1,7 @@
 
 #[derive(Debug, PartialEq)]
 pub enum PseudoInstruction<'a> {
-    ORG(u16),
-    EQU {label: &'a str, value: &'a str},
+    ORG(u16), EQU {label: &'a str, value: &'a str},
     END,
 }
 
