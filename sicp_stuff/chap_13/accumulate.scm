@@ -21,15 +21,35 @@ a. Show that sum and product (Exercise 1.31) are both
   (if (> a b)
 	null-value
 	(combiner (term a)
-			  (accumulate combiner null-value term next(a) b))))
+			  (accumulate combiner null-value term (next a) next b))))
 
 ;; sum implemented as a call to accumulate
 (define (sum term a next b)
-  (accumulate + 0 term a next b)
+  (accumulate + 0 term a next b))
+
+;; test with pi-sum
+(define (pi-sum a b)
+  (define (pi-term x)
+	(/ 1.0 (* x (+ x 2))))
+  (define (pi-next x)
+	(+ x 4))
+  (sum pi-term a pi-next b))
+
+(display (* (pi-sum 1 100) 8))
+(newline)
 
 ;; product implemented as a call to accumulate
 (define (product term a next b)
-  (accumulate * 1 term a next b)
+  (accumulate * 1 term a next b))
+
+;; test with factorial
+(define (factorial n)
+  (define (term a) a)
+  (define (next a) (+ a 1))
+  (product term 1 next n))
+
+(display (factorial 7))
+(newline)
 
 #|
 b. If your accumulate procedure generates a recursive
@@ -44,4 +64,32 @@ b. If your accumulate procedure generates a recursive
 	(if (> a b)
 	  result
 	  (iter (next a) (combiner result (term a)))))
-  (iter a null-value)
+  (iter a null-value))
+
+;; sum implemented as a call to accumulate
+(define (sum-iter term a next b)
+  (accumulate-iter + 0 term a next b))
+
+;; test with pi-sum
+(define (pi-sum-iter a b)
+  (define (pi-term x)
+	(/ 1.0 (* x (+ x 2))))
+  (define (pi-next x)
+	(+ x 4))
+  (sum-iter pi-term a pi-next b))
+
+(display (* (pi-sum-iter 1 100) 8))
+(newline)
+
+;; product implemented as a call to accumulate
+(define (product-iter term a next b)
+  (accumulate-iter * 1 term a next b))
+
+;; test with factorial
+(define (factorial-iter n)
+  (define (term a) a)
+  (define (next a) (+ a 1))
+  (product-iter term 1 next n))
+
+(display (factorial-iter 7))
+(newline)

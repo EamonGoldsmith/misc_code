@@ -46,3 +46,10 @@
 (display (* (pi-sum 1 1000) 8))
 (newline)
 
+;; saving this for later :)
+(define (repeat f n)
+  (define (iter i)
+	(display (f i))
+	(newline)
+	(if (< i n) (iter (+ i 1))))
+  (iter 0))
