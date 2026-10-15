@@ -1,5 +1,5 @@
-#ifndef CUBE_H_
-#define CUBE_H_
+#ifndef VERTEX_DATA_H_
+#define VERTEX_DATA_H_
 
 #include <cglm/cglm.h>
 
@@ -61,4 +61,11 @@ static float vertices[] = {
     -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f
 };
 
-#endif // SUBE_H_
+vec3 light_positions[] = {
+	{ 20.7f,  0.2f,  8.0f},
+	{ 2.3f, -3.3f, -4.0f},
+	{-4.0f,  2.0f, -12.0f},
+	{ 0.0f,  0.0f, -3.0f}
+};
+
+#endif // VERTEX_DATA_H_

@@ -1,4 +1,4 @@
-#include "shaders.h"
+#include "shader.h"
 
 #include <GL/glew.h>
 
@@ -131,6 +131,18 @@ void shader_set_int(unsigned int shader, const char *name, int value)
 void shader_set_float(unsigned int shader, const char *name, float value)
 {
 	glUniform1f(glGetUniformLocation(shader, name), value);
+}
+
+void shader_set_vec3(unsigned int shader, const char *name, vec3 value)
+{
+	glUniform3f(glGetUniformLocation(shader, name),
+		value[0], value[1], value[2]);
+}
+
+void shader_set_mat4(unsigned int shader, const char *name, mat4 value)
+{
+	glUniformMatrix4fv(glGetUniformLocation(shader, name),
+		1, GL_FALSE, &value[0][0]);
 }
 
 void destroy_shader(unsigned int shader)

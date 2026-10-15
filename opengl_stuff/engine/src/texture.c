@@ -6,14 +6,16 @@
 
 #include <GL/glew.h>
 
-int load_texture(const char *filename, texture_t *tex, int format)
+int load_texture(const char *filename, texture_t *tex, int format,
+	enum texture_types type)
 {
 	printf("Reading texture: %s\n", filename);
-	glGenTextures(1, &tex->texture);
-	printf("Attached texture to: %i\n", tex->texture);
-	glBindTexture(GL_TEXTURE_2D, tex->texture);
+	glGenTextures(1, &tex->id);
+	printf("Attached texture to: %i\n", tex->id);
+	glBindTexture(GL_TEXTURE_2D, tex->id);
 
-	// set the texture wrapping/filtering options (on the currently bound texture object)
+	/* set the texture wrapping/filtering options
+	 * (on the currently bound texture object) */
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);	
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -31,6 +33,7 @@ int load_texture(const char *filename, texture_t *tex, int format)
 	glTexImage2D(GL_TEXTURE_2D, 0, format, 
 		tex->width, tex->height, 0, format, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
+	tex->type = type;
 
 	stbi_image_free(data);
 
@@ -39,5 +42,5 @@ int load_texture(const char *filename, texture_t *tex, int format)
 
 void destroy_texture(texture_t *tex)
 {
-	glDeleteTextures(0, &tex->texture);
+	glDeleteTextures(0, &tex->id);
 }
