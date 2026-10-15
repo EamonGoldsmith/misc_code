@@ -100,12 +100,12 @@ void setup_buffers()
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
     glBindVertexArray(0); 
 
-	if (!load_texture("assets/container.jpg", &container, GL_RGB)) {
+	if (!load_texture("../assets/container.jpg", &container, GL_RGB)) {
 		return;
 	}
 	
 	stbi_set_flip_vertically_on_load(1);
-	if (!load_texture("assets/awesomeface.png", &face, GL_RGBA)) {
+	if (!load_texture("../assets/awesomeface.png", &face, GL_RGBA)) {
 		return;
 	}
 

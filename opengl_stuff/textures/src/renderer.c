@@ -72,13 +72,13 @@ void setup_buffers()
     glBindBuffer(GL_ARRAY_BUFFER, 0); 
     glBindVertexArray(0); 
 
-	if (!load_texture("assets/wall.jpg", &bricks, GL_RGB)) {
+	if (!load_texture("../assets/wall.jpg", &bricks, GL_RGB)) {
 		fprintf(stderr, "failed to load wall texture\n");
 		return;
 	}
 	
 	stbi_set_flip_vertically_on_load(1);
-	if (!load_texture("assets/awesomeface.png", &face, GL_RGBA)) {
+	if (!load_texture("../assets/awesomeface.png", &face, GL_RGBA)) {
 		fprintf(stderr, "failed to load face texture\n");
 		return;
 	}
