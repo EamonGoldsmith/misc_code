@@ -5,11 +5,11 @@
 
 typedef struct
 {
-	mesh_t *meshes;
+	mesh_t **meshes;
 	size_t len_meshes;
 	const char *path;
-} model_data_t;
+} model_t;
 
-model_data_t model_load(const char *path); 
+model_t model_load(const char *path); 
 
 #endif // MODEL_H_

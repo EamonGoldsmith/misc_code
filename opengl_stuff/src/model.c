@@ -9,6 +9,8 @@
 mesh_t *load_mesh(tinyobj_shape_t shape, tinyobj_attrib_t attrib)
 {
 	printf("Mesh loading: %s\n", shape.name);
+	printf("Mesh loading %i faces\n", attrib.num_faces);
+	printf("Mesh loading %i face verts\n", attrib.num_face_num_verts);
 
 	// for each vertex of each face make a vertex_t
 	// some faces may have more than three vertexes? (teapot doesn't)
@@ -17,45 +19,38 @@ mesh_t *load_mesh(tinyobj_shape_t shape, tinyobj_attrib_t attrib)
 		num_vertex += attrib.face_num_verts[i];
 	}
 
-	printf("Indices of face 0: (pos %i, tex %i, norm %i)\n",
-		attrib.faces[0].v_idx,
-		attrib.faces[0].vt_idx,
-		attrib.faces[0].vn_idx);
-
-	printf("Mesh vertex 0: (%f, %f, %f)\n",
-		attrib.vertices[0], 
-		attrib.vertices[1], 
-		attrib.vertices[2]);
-
-	printf("Mesh loading %i faces\n", attrib.num_faces);
-	printf("Mesh loading %i face verts\n", attrib.num_face_num_verts);
-	printf("Mesh allocating %i vertices\n", num_vertex);
-
 	mesh_t mesh = {0};
 	mesh.len_vertices = num_vertex;
 
-	// each mesh has separate allocation
+	printf("Mesh allocating %i vertices\n", num_vertex);
 	mesh.vertices = calloc(num_vertex, sizeof(vertex_t));
 
-	for (int i = shape.face_offset; i < shape.length; i += 3) {
-		if (i < 20) {
-			printf("Position: ");
-			for (int j = 0; j < 3; j++) {
-				printf("%f, ", attrib.vertices[attrib.faces[i + j].v_idx]);
-			}
-			printf("\t");
+	for (int i = shape.face_offset; i < shape.length; i += attrib.face_num_verts[i])
+	{
+		// face_num_verts will always be 3, if mesh triangulated
+		for (int j = 0; j < attrib.face_num_verts[i]; j++)
+		{
+			assert(attrib.face_num_verts[i] == 3);
 
-			printf("Texture: ");
-			for (int j = 0; j < attrib.face_num_verts[i]; j++) {
-				printf("%f, ", attrib.texcoords[attrib.faces[i].vt_idx + j]);
-			}
-			printf("\t");
+			vertex_t *vertex = &mesh.vertices[i + j];
 
-			printf("Normal: ");
-			for (int j = 0; j < attrib.face_num_verts[i]; j++) {
-				printf("%f, ", attrib.normals[attrib.faces[i].vn_idx + j]);
-			}
-			printf("\n");
+			// copy position
+			const int vertex_idx = attrib.faces[j + i].v_idx;
+			vertex->position[j] = attrib.vertices[vertex_idx];
+			vertex->position[j] = attrib.vertices[vertex_idx + 1];
+			vertex->position[j] = attrib.vertices[vertex_idx + 2];
+
+			// copy normal
+			const int normal_idx = attrib.faces[j + i].vn_idx;
+			vertex->normal[j] = attrib.normals[normal_idx];
+			vertex->normal[j] = attrib.normals[normal_idx + 1];
+			vertex->normal[j] = attrib.normals[normal_idx + 2];
+
+			// copy texcoord
+			const int texcoord_idx = attrib.faces[j + i].vt_idx;
+			vertex->tex_coords[j] = attrib.texcoords[texcoord_idx];
+			vertex->tex_coords[j] = attrib.texcoords[texcoord_idx + 1];
+			vertex->tex_coords[j] = attrib.texcoords[texcoord_idx + 2];
 		}
 	}
 
@@ -99,7 +94,7 @@ void load_file(
 	printf("Loaded file %s, %lu bytes read\n", path, bytes_read);
 }
 
-model_data_t model_load(const char *path)
+model_t model_load(const char *path)
 {
 	tinyobj_shape_t *shape = NULL;
 	unsigned long num_shapes;
@@ -108,8 +103,6 @@ model_data_t model_load(const char *path)
 	unsigned long num_materials;
 	
 	tinyobj_attrib_t attrib;
-
-	tinyobj_attrib_init(&attrib);
 
 	int result = tinyobj_parse_obj(
 		&attrib,
@@ -122,21 +115,21 @@ model_data_t model_load(const char *path)
 
 	if (result != TINYOBJ_SUCCESS) {
 		fprintf(stderr, "Failed to load model: %s\n", path);
-		return (model_data_t) { NULL, 0, NULL };
+		return (model_t) { NULL, 0, NULL };
 	}
 
-	model_data_t loaded = {0};
+	model_t loaded = {0};
 	loaded.path = strdup(path);
+	loaded.meshes = malloc(sizeof(mesh_t*) * num_shapes);
+
+	for (int i = 0; i < num_shapes; i++) {
+		loaded.meshes[i] = load_mesh(shape[i], attrib);
+	}
+	loaded.len_meshes = num_shapes;
 
 	for (int i = 0; i < num_materials; i++) {
 		printf("Skip\n");
 	}
-
-	for (int i = 0; i < num_shapes; i++) {
-		(void) load_mesh(shape[i], attrib);
-	}
-
-	loaded.len_meshes = num_shapes;
 
 	tinyobj_attrib_free(&attrib);
 

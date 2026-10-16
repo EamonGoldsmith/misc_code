@@ -63,7 +63,6 @@ void main()
     }
 
     // spot light
-
     FragColor = vec4(result, 1.0);
 }
 
@@ -76,7 +75,7 @@ vec3 CalcEmissionLight()
 		return vec3(0.0);
 	}
 
-	return emitt;
+	return emitt * 0.5;
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
