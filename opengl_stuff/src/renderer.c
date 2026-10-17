@@ -33,13 +33,7 @@ int start_renderer(const int width, const int height)
 	init_camera(&camera);
 
 	// load teapot model:
-	//teapot = model_load("assets/utah_teapot.obj");
-
-	/*
-	for (int i = 0; i < teapot.meshes[0]->len_vertices; i++) {
-		printf("V: %f\n", teapot.meshes[0]->vertices[i].position[0]);
-	}
-	*/
+	teapot = model_load("assets/obj/teapot.obj");
 
 	return 1;
 }
@@ -48,38 +42,27 @@ void compile_shaders()
 {
 	// shaders for container
 	if (!create_shader_program(&pgm,
-		"shaders/phong_lighting.vs",
-		"shaders/phong_lighting.fs"))
-	{
+			"shaders/phong_lighting.vs", "shaders/phong_lighting.fs"))
 		fprintf(stderr, "Found shader error...");
-	}
 
 	// shaders for light source
 	if (!create_shader_program(&light_source,
-		"shaders/light_cube.vs",
-		"shaders/light_cube.fs"))
-	{
+			"shaders/light_cube.vs",
+			"shaders/light_cube.fs"))
 		fprintf(stderr, "Found shader error...");
-	}
 
 	// load textures
-	if (!load_texture("assets/crate_diffuse.png",
+	if (!load_texture("assets/textures/crate_diffuse.png",
 			&diffuse_map, GL_RGBA, TEXTURE_DIFFUSE))
-	{
 		fprintf(stderr, "failed to load crate texture\n");
-	}
 
-	if (!load_texture("assets/crate_specular.png",
+	if (!load_texture("assets/textures/crate_specular.png",
 			&specular_map, GL_RGBA, TEXTURE_SPECULAR)) 
-	{
 		fprintf(stderr, "failed to load spec texture\n");
-	}
 
-	if (!load_texture("assets/matrix.jpg",
+	if (!load_texture("assets/textures/matrix.jpg",
 			&emission_map, GL_RGB, TEXTURE_EMISSION))
-	{
 		fprintf(stderr, "failed to load mat texture\n");
-	}
 }
 
 void setup_buffers()
@@ -124,34 +107,8 @@ void setup_buffers()
 			8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	/*
 	// CREATE THE TEAPOT MESH
-	//mesh_setup(teapot.meshes[0]);
-	mesh_t = teapot.meshes[0];
-
-	glGenVertexArrays(1, &tp->VAO);
-	glGenBuffers(1, &tp->VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, tp->VBO);
-    glBufferData(GL_ARRAY_BUFFER, tp->len_vertices, tp->vertices, GL_STATIC_DRAW);
-
-    // bind the container VAO first
-    glBindVertexArray(tp->VAO);
-
-	// position attribute of VAO (first three nums)
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),	(void*)0);
-    glEnableVertexAttribArray(0);
-
-	// normal attribute of VAO (next three nums, normals of faces)
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-			(void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	// texture attribute (what corners map to where on the texture)
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float),
-			(void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-	*/
+	assert(model_setup(&teapot) > 0);
 }
 
 void render(float time, state_t *state)
@@ -189,35 +146,25 @@ void render(float time, state_t *state)
 	glUseProgram(pgm);
 
 	// set light properties
-	shader_set_vec3(pgm, "pointLights[0].position", &light_positions[0][0]);
-	shader_set_float(pgm, "pointLights[0].constant", 0.1f);
-	shader_set_float(pgm, "pointLights[0].linear", 0.09f);
-	shader_set_float(pgm, "pointLights[0].quadratic", 0.032f);
-	shader_set_vec3(pgm, "pointLights[0].ambient", (vec3){1.0f, 1.0f, 1.0f});
-	shader_set_vec3(pgm, "pointLights[0].diffuse", (vec3){0.2f, 0.2f, 0.2f});
-	shader_set_vec3(pgm, "pointLights[0].specular", (vec3){1.0f, 1.0f, 1.0f});
+	light_t pt_light = {
+		.position	= light_positions[0][0],
+		.constant	= 0.1f,
+		.linear		= 0.09f,
+		.quadratic	= 0.032f,
+		.ambient	= {0.5f, 0.5f, 0.5f},
+		.diffuse	= {0.8f, 0.8f, 0.8f},
+		.specular	= {0.9f, 0.9f, 0.9f}
+	};
 
-	shader_set_vec3(pgm, "pointLights[1].position", &light_positions[1][0]);
-	shader_set_float(pgm, "pointLights[1].constant", 0.1f);
-	shader_set_float(pgm, "pointLights[1].linear", 0.09f);
-	shader_set_float(pgm, "pointLights[1].quadratic", 0.032f);
-	shader_set_vec3(pgm, "pointLights[1].ambient", (vec3){0.5f, 0.5f, 0.5f});
-	shader_set_vec3(pgm, "pointLights[1].diffuse", (vec3){0.2f, 0.2f, 0.2f});
-	shader_set_vec3(pgm, "pointLights[1].specular", (vec3){1.0f, 1.0f, 1.0f});
-
-	shader_set_vec3(pgm, "pointLights[2].position", &light_positions[2][0]);
-	shader_set_float(pgm, "pointLights[2].constant", 0.1f);
-	shader_set_float(pgm, "pointLights[2].linear", 0.09f);
-	shader_set_float(pgm, "pointLights[2].quadratic", 0.032f);
-	shader_set_vec3(pgm, "pointLights[2].ambient", (vec3){0.5f, 0.5f, 0.5f});
-	shader_set_vec3(pgm, "pointLights[2].diffuse", (vec3){0.2f, 0.2f, 0.2f});
-	shader_set_vec3(pgm, "pointLights[2].specular", (vec3){1.0f, 1.0f, 1.0f});
+	shader_set_uniform(pgm, "pointLights[0]", pt_light);
+	shader_set_uniform(pgm, "pointLights[1]", pt_light);
+	shader_set_uniform(pgm, "pointLights[2]", pt_light);
 
 	// set directional light
-	shader_set_vec3(pgm, "dirLight.direction", (vec3){-2.0f, -1.0f, -0.3f});
-	shader_set_vec3(pgm, "dirLight.ambient", (vec3){0.00f, 0.00f, 0.00f});
-	shader_set_vec3(pgm, "dirLight.diffuse", (vec3){0.00f, 0.00f, 0.00f});
-	shader_set_vec3(pgm, "dirLight.specular", (vec3){0.00f, 0.00f, 0.00f});
+	shader_set_vec3(pgm, "dirLight.direction", ((vec3){-2.0f, -1.0f, -0.3f}));
+	shader_set_vec3(pgm, "dirLight.ambient", ((vec3){0.00f, 0.00f, 0.00f}));
+	shader_set_vec3(pgm, "dirLight.diffuse", ((vec3){0.00f, 0.00f, 0.00f}));
+	shader_set_vec3(pgm, "dirLight.specular", ((vec3){0.00f, 0.00f, 0.00f}));
 
 	// set material properties
 	shader_set_int(pgm, "material.diffuse", 0);
@@ -231,10 +178,7 @@ void render(float time, state_t *state)
 	shader_set_mat4(pgm, "projection", projection);
 	shader_set_mat4(pgm, "view", view);
 
-	glBindVertexArray(cubeVAO);
-
 	// draw the CUBES
-
 	for (int i = 0; i < 10; i++)
 	{
 		glm_mat4_dup(GLM_MAT4_IDENTITY, model);
@@ -248,10 +192,12 @@ void render(float time, state_t *state)
 		glUniformMatrix4fv(glGetUniformLocation(pgm, "model"),
 			1, GL_FALSE, &model[0][0]);
 		
+		glBindVertexArray(cubeVAO);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
 	// draw teapot
+	mesh_draw(&teapot.meshes[0], pgm);
 
 	// render the light sources
 	glUseProgram(light_source);

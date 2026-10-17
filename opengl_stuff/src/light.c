@@ -28,29 +28,3 @@ light_t *light_create(vec3 position)
 
 	return light;
 }
-
-void light_bind(unsigned int program, char *name, light_t* light)
-{
-	char *position = strcat(name, ".position");
-	shader_set_vec3(program, position, light->ambient);
-	free(position);
-
-	shader_set_float(program, "pointLights[0].constant", light->constant);
-	shader_set_float(program, "pointLights[0].linear", light->linear);
-	shader_set_float(program, "pointLights[0].quadratic", light->quadratic);
-
-	char *diffuse = strcat(name, ".diffuse");
-	shader_set_vec3(program, diffuse, light->diffuse);
-	free(diffuse);
-
-	char *specular = strcat(name, ".specular");
-	shader_set_vec3(program, specular, light->specular);
-	free(specular);
-}
-
-void light_array_bind( unsigned int program, char *name, unsigned int num,
-	light_t* light)
-{
-
-}
-

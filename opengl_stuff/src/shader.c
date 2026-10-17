@@ -1,11 +1,15 @@
 #include "shader.h"
 
+#include "light.h"
+#include "string_builder.h"
+
 #include <GL/glew.h>
 
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #define INFO_LOG_LEN (512U)
 char info_log[INFO_LOG_LEN];
@@ -21,8 +25,8 @@ int create_shader_program(unsigned int *shader, char *vertex_file, char *frag_fi
 	char *frag_src = read_shader_file(frag_file);
 
 	// debug print source
-	//printf("vertex code: \n%s\n", vertex_src);
-	//printf("fragment code: \n%s\n", frag_src);
+	//printf("vertex shader code: \n%s\n", vertex_src);
+	//printf("fragment shader code: \n%s\n", frag_src);
 
 	// compile
 	if (!compile_shader_list(&vertex_src, 1, vertex_shader)) {
@@ -143,6 +147,40 @@ void shader_set_mat4(unsigned int shader, const char *name, mat4 value)
 {
 	glUniformMatrix4fv(glGetUniformLocation(shader, name),
 		1, GL_FALSE, &value[0][0]);
+}
+
+void shader_set_light_t(unsigned int shader, char *name, light_t* light)
+{
+	sb_t sb;
+	sb_init(&sb);
+
+	sb_appendf(&sb, "%s", name);
+	int mark = sb_mark(&sb);
+
+#define SET_LIGHT_PROPERTY(type, member, ...) \
+	sb_appendf(&sb, ".%s", #member); \
+	sb_terminate(&sb); \
+	shader_set_##type(shader, sb.str, light->member); \
+	sb_rewind(&sb, mark);
+
+	FOR_LIGHT_PROPERTIES(SET_LIGHT_PROPERTY);
+
+#undef SET_LIGHT_PROPERTY
+}
+
+void shader_set_texture_t(unsigned int shader, char *name, texture_t* texture)
+{
+
+}
+
+void shader_set_material_t(unsigned int shader, char *name, material_t* material)
+{
+
+}
+
+void shader_unsupported_uniform(unsigned int shader, char *name, void *value)
+{
+	printf("Shader error %s has unsupported data type\n", name);
 }
 
 void destroy_shader(unsigned int shader)

@@ -12,11 +12,13 @@ typedef struct
 	vec3 tex_coords;
 } vertex_t;
 
+int vertex_eq(vertex_t *a, vertex_t *b);
+
 typedef struct
 {
 	vertex_t *vertices;		size_t len_vertices;
 	texture_t *textures;	size_t len_textures;
-	int *indices;			size_t len_indices;
+	unsigned int *indices;	size_t len_indices;
 
 	unsigned int VAO, VBO, EBO;
 } mesh_t;

@@ -30,6 +30,7 @@ static inline const char *texture_type_str(texture_t texture) {
 
 int load_texture(const char *filename, texture_t *tex, int format,
 	enum texture_types type);
+
 void destroy_texture(texture_t *tex);
 
 #endif // TEXTURE_H_

@@ -1,8 +1,2 @@
-
-#define TINYOBJ_LOADER_C_IMPLEMENTATION
-
-#include <float.h>
-#include <limits.h>
-#include <math.h>
-
+#define CGLTF_IMPLEMENTATION
 #include "model_loader.h"
