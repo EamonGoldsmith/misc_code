@@ -33,7 +33,7 @@ int start_renderer(const int width, const int height)
 	init_camera(&camera);
 
 	// load teapot model:
-	teapot = model_load("assets/obj/teapot.obj");
+	teapot = model_load("assets/gltf/scene.gltf", "assets/gltf/scene.bin");
 
 	return 1;
 }

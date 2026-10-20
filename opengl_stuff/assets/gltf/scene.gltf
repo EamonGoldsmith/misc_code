@@ -5972,13 +5972,13 @@
   ],
   "images": [
     {
-      "uri": "textures/Scene_-_Root_baseColor.jpeg"
+      "uri": "textures/base_colour.jpeg"
     },
     {
-      "uri": "textures/Scene_-_Root_metallicRoughness.png"
+      "uri": "textures/metallic_roughness.png"
     },
     {
-      "uri": "textures/Scene_-_Root_normal.png"
+      "uri": "textures/normal.png"
     }
   ],
   "materials": [

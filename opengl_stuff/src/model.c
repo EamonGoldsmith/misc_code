@@ -6,177 +6,94 @@
 #include <string.h>
 #include <assert.h>
 
-int load_mesh(mesh_t *mesh, tinyobj_shape_t shape, tinyobj_attrib_t attrib)
+model_t model_load(const char *path, const char *bin_path)
 {
-	assert(mesh != NULL);
+	assert(path != NULL);
+	assert(strlen(path) > 0);
 
-	printf("Mesh loading: %s\n", shape.name);
+	printf("Loading model: %s\n", path);
 
-	mesh->len_vertices = 0;
+    cgltf_options options = {0};
+    cgltf_data *data = NULL;
+	cgltf_result result = cgltf_parse_file(&options, path, &data);
+    assert(result == cgltf_result_success);
 
-	for (int i = shape.face_offset; i < shape.length + shape.face_offset; i++) {
-		assert(attrib.face_num_verts[i] == 3);
-		mesh->len_vertices += attrib.face_num_verts[i];
-	}
-	
-	mesh->len_indices = mesh->len_vertices;
+	printf("Model has %li materials\n", data->materials_count);
+	printf("Model has %li buffers\n", data->buffers_count);
+	printf("Model has %li images\n", data->images_count);
 
-	mesh->vertices = calloc(mesh->len_vertices, sizeof(vertex_t));
-	assert(mesh->vertices != NULL);
+	result = cgltf_load_buffers(&options, data, bin_path);
+    assert(result == cgltf_result_success);
 
-	mesh->indices = calloc(mesh->len_indices, sizeof(unsigned int));
-	assert(mesh->indices != NULL);
+	printf("Model size %li\n", data->bin_size);
+	cgltf_primitive *prim = &data->meshes[0].primitives[0];
 
-	size_t vertex_counter = 0;
-	size_t index_counter = 0;
+    cgltf_accessor *pos_accessor = NULL;
+    cgltf_accessor *norm_accessor = NULL;
+    cgltf_accessor *uv_accessor = NULL;
 
-	for (size_t i = shape.face_offset; i < shape.length + shape.face_offset; i++)
+    for (size_t i = 0; i < prim->attributes_count; i++)
 	{
-		for (int v = 0; v < attrib.face_num_verts[i]; v++)
-		{
-			vertex_t *vertex = &mesh->vertices[vertex_counter];
-			tinyobj_vertex_index_t face = attrib.faces[i * 3 + v];
+        if (prim->attributes[i].type == cgltf_attribute_type_position)
+            pos_accessor = prim->attributes[i].data;
 
-			// copy position
-			int idx = face.v_idx * 3;
-			vertex->position[0] = attrib.vertices[idx];
-			vertex->position[1] = attrib.vertices[idx + 1];
-			vertex->position[2] = attrib.vertices[idx + 2];
+        if (prim->attributes[i].type == cgltf_attribute_type_normal)
+            norm_accessor = prim->attributes[i].data;
 
-			// copy normal
-			idx = face.vn_idx * 3;
-			vertex->normal[0] = attrib.normals[idx];
-			vertex->normal[1] = attrib.normals[idx + 1];
-			vertex->normal[2] = attrib.normals[idx + 2];
+        if (prim->attributes[i].type == cgltf_attribute_type_texcoord)
+            if (uv_accessor == NULL)
+                uv_accessor = prim->attributes[i].data;
+    }
 
-			// copy texcoord
-			idx = face.vt_idx * 2;
-			vertex->tex_coords[0] = attrib.texcoords[idx];
-			vertex->tex_coords[1] = attrib.texcoords[idx + 1];
-			vertex->tex_coords[2] = 0.0f;
-
-			int existing_index = -1;
-			for (size_t j = 0; j < vertex_counter; j++) {
-				if (vertex_eq(&mesh->vertices[j], vertex)) {
-					existing_index = (int)j;
-					break;
-				}
-			}
-
-			if (existing_index != -1) {
-				mesh->indices[index_counter++] = (unsigned int)existing_index;
-			} else {
-				mesh->vertices[vertex_counter] = *vertex;
-				mesh->indices[index_counter++] = (unsigned int)vertex_counter;
-				vertex_counter++;
-			}
-		}
-	}
-
-	return 1;
-}
-
-void load_file(
-	void *ctx, const char *path,
-	const int is_mtl, const char *obj_filename, 
-	char **buffer, size_t *len)
-{
-    FILE *fp = fopen(path, "r");
-
-    if (!fp) {
-		*len = 0;
-		fprintf(stderr, "Failed to open file: %s\n", path);
-		return;
-	}
-
-	fseek(fp, 0, SEEK_END);
-	size_t file_size = ftell(fp);
-	rewind(fp);
-
-	*buffer = malloc(sizeof(char) * (file_size + 1));
-	if (!buffer) {
-		*len = 0;
-		fprintf(stderr, "Failed to allocate file buffer\n");
-		return;
-	}
-
-	size_t bytes_read = fread(*buffer, sizeof(char), file_size, fp);
-	(*buffer)[file_size] = '\0';
-
-	if (file_size != bytes_read) {
-		free(*buffer);
-		*buffer = NULL;
-	}
-
-	fclose(fp);
-	*len = bytes_read;
-	printf("Loaded file %s, %lu bytes read\n", path, bytes_read);
-}
-
-model_t model_load(const char *path)
-{
-	tinyobj_shape_t *shape = NULL;
-	unsigned long num_shapes;
-
-	tinyobj_material_t *material = NULL;
-	unsigned long num_materials;
-	
-	tinyobj_attrib_t attrib;
-
-	int result = tinyobj_parse_obj(
-		&attrib,
-		&shape, &num_shapes,
-		&material, &num_materials,
-		path, 
-		load_file, 
-		NULL,
-		TINYOBJ_FLAG_TRIANGULATE);
-
-	if (result != TINYOBJ_SUCCESS) {
-		fprintf(stderr, "Failed to load model: %s\n", path);
-		return (model_t) { NULL, 0, NULL };
-	}
-
-	assert(num_shapes > 0);
+    assert(pos_accessor != NULL);
+    size_t vertex_count = pos_accessor->count;
 
 	model_t loaded = {0};
-	loaded.path = strdup(path);
-	loaded.meshes = calloc(num_shapes, sizeof(mesh_t));
+	loaded.meshes = calloc(1, sizeof(mesh_t));
+	mesh_t *mesh = &loaded.meshes[0];
 
-	assert(loaded.meshes != NULL);
+    mesh->len_vertices = vertex_count;
+    mesh->vertices = calloc(vertex_count, sizeof(vertex_t));
+    assert(mesh->vertices != NULL);
 
-	printf("Model loading %li shapes\n", num_shapes);
-	for (int i = 0; i < num_shapes; i++) {
-		load_mesh(&loaded.meshes[i], shape[i], attrib);
-	}
-	loaded.len_meshes = num_shapes;
+    for (size_t i = 0; i < vertex_count; i++) {
+        vertex_t *v = &mesh->vertices[i];
 
-	if (num_materials > 0) {
-		printf("Model loading %li materials\n", num_materials);
-		for (int i = 0; i < num_materials; i++) {
-			
-		}
-	} else {
-		printf("Model: no materials found loading default\n");
-	}
+        cgltf_accessor_read_float(pos_accessor, i, v->position, 3);
 
-	tinyobj_attrib_free(&attrib);
+        if (norm_accessor) {
+            cgltf_accessor_read_float(norm_accessor, i, v->normal, 3);
+        }
 
-	if (shape)
-		tinyobj_shapes_free(shape, num_shapes);
+        if (uv_accessor) {
+            float uv[2];
+            cgltf_accessor_read_float(uv_accessor, i, uv, 2);
+            v->tex_coords[0] = uv[0];
+            v->tex_coords[1] = uv[1];
+            v->tex_coords[2] = 0.0f;
+        }
+    }
 
-	if (material)
-		tinyobj_materials_free(material, num_materials);
+    if (prim->indices != NULL) {
+        cgltf_accessor *index_accessor = prim->indices;
+        size_t index_count = index_accessor->count;
 
-	return loaded;
+        mesh->len_indices = index_count;
+        mesh->indices = malloc(index_count * sizeof(unsigned int));
+        assert(mesh->indices != NULL);
+
+        for (size_t i = 0; i < index_count; i++) {
+            mesh->indices[i] = (unsigned int)cgltf_accessor_read_index(index_accessor, i);
+        }
+    }
+
+    cgltf_free(data);
+
+	return (model_t){ NULL, 0, NULL };
 }
 
 int model_setup(model_t *model)
 {
-	for (int i = 0; i < model->len_meshes; i++) {
-		mesh_setup(&model->meshes[i]);
-	}
-
 	return 1;
 }
 
