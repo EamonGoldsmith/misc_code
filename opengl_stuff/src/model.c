@@ -6,27 +6,8 @@
 #include <string.h>
 #include <assert.h>
 
-model_t model_load(const char *path, const char *bin_path)
+void model_load_primitive(cgtlf_primitive *prim)
 {
-	assert(path != NULL);
-	assert(strlen(path) > 0);
-
-	printf("Loading model: %s\n", path);
-
-    cgltf_options options = {0};
-    cgltf_data *data = NULL;
-	cgltf_result result = cgltf_parse_file(&options, path, &data);
-    assert(result == cgltf_result_success);
-
-	printf("Model has %li materials\n", data->materials_count);
-	printf("Model has %li buffers\n", data->buffers_count);
-	printf("Model has %li images\n", data->images_count);
-
-	result = cgltf_load_buffers(&options, data, bin_path);
-    assert(result == cgltf_result_success);
-
-	printf("Model size %li\n", data->bin_size);
-	cgltf_primitive *prim = &data->meshes[0].primitives[0];
 
     cgltf_accessor *pos_accessor = NULL;
     cgltf_accessor *norm_accessor = NULL;
@@ -60,6 +41,10 @@ model_t model_load(const char *path, const char *bin_path)
         vertex_t *v = &mesh->vertices[i];
 
         cgltf_accessor_read_float(pos_accessor, i, v->position, 3);
+		printf("loading vertex %li, (%f, %f, %f)\n", i,
+				v->position[0],
+				v->position[1],
+				v->position[2]);
 
         if (norm_accessor) {
             cgltf_accessor_read_float(norm_accessor, i, v->normal, 3);
@@ -83,9 +68,37 @@ model_t model_load(const char *path, const char *bin_path)
         assert(mesh->indices != NULL);
 
         for (size_t i = 0; i < index_count; i++) {
-            mesh->indices[i] = (unsigned int)cgltf_accessor_read_index(index_accessor, i);
+            mesh->indices[i] = 
+				(unsigned int)cgltf_accessor_read_index(index_accessor, i);
         }
     }
+}
+
+model_t model_load(const char *path, const char *bin_path)
+{
+	assert(path != NULL);
+	assert(strlen(path) > 0);
+
+	printf("Loading model: %s\n", path);
+
+    cgltf_options options = {0};
+    cgltf_data *data = NULL;
+	cgltf_result result = cgltf_parse_file(&options, path, &data);
+    assert(result == cgltf_result_success);
+
+	printf("Model has %li materials\n", data->materials_count);
+	printf("Model has %li buffers\n", data->buffers_count);
+	printf("Model has %li images\n", data->images_count);
+
+	result = cgltf_load_buffers(&options, data, bin_path);
+    assert(result == cgltf_result_success);
+
+	printf("Model size %li\n", data->bin_size);
+
+	for (size_t i = 0; i < data->meshes_count; i++)
+	{
+		cgltf_primitive *prim = &data->meshes[0].primitives[0];
+	}
 
     cgltf_free(data);
 
