@@ -7,6 +7,10 @@ enum Progress {
     Complete,
 }
 
+fn filter_exercises(map: &HashMap<String, Progress>, value: Progress) -> impl Iterator {
+    map.values().filter(move |x| **x == value)
+}
+
 fn count_exercise(map: &HashMap<String, Progress>, value: Progress) -> usize {
     map.values().filter(|x| **x == value).count()
 }
@@ -48,6 +52,12 @@ fn main() {
     use Progress::*;
 
     let map = get_map();
-    println!("contains {} complete exercises", count_exercise(&map, Complete));
+    println!("map contains {} complete exercises", count_exercise(&map, Complete));
+
+    // using iterator return
+    println!("map contains {} None exercises", filter_exercises(&map, None).count());
+
+    let collection = get_vec_map();
+    println!("collection contains {} Complete exercises", count_exercise_collection(&collection, Complete)); 
 }
 
