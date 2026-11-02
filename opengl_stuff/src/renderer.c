@@ -21,7 +21,7 @@ texture_t diffuse_map;
 texture_t specular_map;
 texture_t emission_map;
 
-model_t teapot;
+model_t backpack;
 
 int start_renderer(const int width, const int height)
 {
@@ -33,7 +33,8 @@ int start_renderer(const int width, const int height)
 	init_camera(&camera);
 
 	// load teapot model:
-	teapot = model_load("assets/gltf/scene.gltf", "assets/gltf/scene.bin");
+	backpack = model_load("assets/gltf/scene.gltf", "assets/gltf/scene.bin");
+	assert(backpack.meshes != NULL);
 
 	return 1;
 }
@@ -108,7 +109,7 @@ void setup_buffers()
 	glEnableVertexAttribArray(0);
 
 	// CREATE THE TEAPOT MESH
-	assert(model_setup(&teapot) > 0);
+	model_setup(&backpack);
 }
 
 void render(float time, state_t *state)
@@ -196,8 +197,8 @@ void render(float time, state_t *state)
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 	}
 
-	// draw teapot
-	mesh_draw(&teapot.meshes[0], pgm);
+	// draw backpack
+	model_draw(&backpack, pgm);
 
 	// render the light sources
 	glUseProgram(light_source);
@@ -228,6 +229,8 @@ void render(float time, state_t *state)
 
 void close_renderer()
 {
+	destroy_model(&backpack);
+
 	// delete opengl things
 	glDeleteVertexArrays(1, &cubeVAO);
 	glDeleteBuffers(1, &cubeVBO);

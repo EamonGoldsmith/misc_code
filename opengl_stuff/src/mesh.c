@@ -39,6 +39,9 @@ void mesh_setup(mesh_t *mesh)
 	assert(mesh->vertices != NULL);
 	assert(mesh->len_vertices > 0);
 
+	assert(mesh->indices != NULL);
+	assert(mesh->len_indices > 0);
+
 	glGenVertexArrays(1, &mesh->VAO);
 
 		// create buffers
@@ -55,7 +58,7 @@ void mesh_setup(mesh_t *mesh)
 	// fill element buffer
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh->EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-		mesh->len_indices * sizeof(int), mesh->indices, GL_STATIC_DRAW);
+		mesh->len_indices * sizeof(unsigned int), mesh->indices, GL_STATIC_DRAW);
 
 	// vertex array layout:
 
@@ -79,27 +82,30 @@ void mesh_setup(mesh_t *mesh)
 
 void mesh_draw(mesh_t *mesh, unsigned int shader)
 {
-	sb_t variable;
-	sb_init(&variable);
+	assert(mesh != NULL);
+
+	//sb_t variable;
+	//sb_init(&variable);
 
 	for (int i = 0; i < mesh->len_textures; i++)
 	{
 		// bind textures
-		glActiveTexture(GL_TEXTURE0 + i);
+		//glActiveTexture(GL_TEXTURE0 + i);
 
-		texture_t texture = mesh->textures[i];
-		sb_appendf(&variable, "material.%s%i", texture_type_str(texture), i);
-		sb_terminate(&variable);
+		//texture_t texture = mesh->textures[i];
+		//sb_appendf(&variable, "material.%s%i", texture_type_str(texture), i);
+		//sb_terminate(&variable);
 
-		shader_set_int(shader, variable.str, texture.id);
-		sb_clear(&variable);
+		//shader_set_int(shader, variable.str, texture.id);
+		//sb_clear(&variable);
 
-		glBindTexture(GL_TEXTURE_2D, texture.id);
+		//glBindTexture(GL_TEXTURE_2D, texture.id);
 	}
 
 	// draw
 	glBindVertexArray(mesh->VAO);
-	glDrawElements(GL_TRIANGLES, mesh->len_indices, GL_UNSIGNED_INT, 0);
+	glDrawElements(
+			GL_TRIANGLES, mesh->len_indices, GL_UNSIGNED_INT, (void*)0);
 }
 
 void mesh_destroy(mesh_t *mesh)

@@ -1,13 +1,15 @@
 #include "model.h"
 #include "model_loader.h"
+#include "mesh.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 
-void model_load_primitive(cgtlf_primitive *prim)
+void model_load_primitive(mesh_t *mesh, cgltf_primitive *prim)
 {
+	assert(prim != NULL);
 
     cgltf_accessor *pos_accessor = NULL;
     cgltf_accessor *norm_accessor = NULL;
@@ -29,10 +31,6 @@ void model_load_primitive(cgtlf_primitive *prim)
     assert(pos_accessor != NULL);
     size_t vertex_count = pos_accessor->count;
 
-	model_t loaded = {0};
-	loaded.meshes = calloc(1, sizeof(mesh_t));
-	mesh_t *mesh = &loaded.meshes[0];
-
     mesh->len_vertices = vertex_count;
     mesh->vertices = calloc(vertex_count, sizeof(vertex_t));
     assert(mesh->vertices != NULL);
@@ -41,10 +39,6 @@ void model_load_primitive(cgtlf_primitive *prim)
         vertex_t *v = &mesh->vertices[i];
 
         cgltf_accessor_read_float(pos_accessor, i, v->position, 3);
-		printf("loading vertex %li, (%f, %f, %f)\n", i,
-				v->position[0],
-				v->position[1],
-				v->position[2]);
 
         if (norm_accessor) {
             cgltf_accessor_read_float(norm_accessor, i, v->normal, 3);
@@ -59,19 +53,40 @@ void model_load_primitive(cgtlf_primitive *prim)
         }
     }
 
-    if (prim->indices != NULL) {
-        cgltf_accessor *index_accessor = prim->indices;
-        size_t index_count = index_accessor->count;
+	assert(prim->indices != NULL);
 
-        mesh->len_indices = index_count;
-        mesh->indices = malloc(index_count * sizeof(unsigned int));
-        assert(mesh->indices != NULL);
+	cgltf_accessor *index_accessor = prim->indices;
+	size_t index_count = index_accessor->count;
+	mesh->len_indices = index_count;
+	mesh->indices = malloc(index_count * sizeof(unsigned int));
+	assert(mesh->indices != NULL);
 
-        for (size_t i = 0; i < index_count; i++) {
-            mesh->indices[i] = 
-				(unsigned int)cgltf_accessor_read_index(index_accessor, i);
-        }
-    }
+	for (size_t i = 0; i < index_count; i++) {
+		mesh->indices[i] = 
+			(unsigned int)cgltf_accessor_read_index(index_accessor, i);
+	}
+}
+
+void parse_node(cgltf_node *node)
+{
+	printf("parsing node: %s\n", node->name);
+	printf("this node has %li children\n", node->children_count);
+
+	if (node->children_count > 0)
+	{
+		printf("->");
+		parse_node(node->children[0]);
+	}
+}
+
+void parse_scene(cgltf_scene *scene)
+{
+	printf("Model parsing scene: %s\n", scene->name);
+
+	for (size_t i = 0; i < scene->nodes_count; i++)
+	{
+		parse_node(scene->nodes[i]);
+	}
 }
 
 model_t model_load(const char *path, const char *bin_path)
@@ -89,33 +104,46 @@ model_t model_load(const char *path, const char *bin_path)
 	printf("Model has %li materials\n", data->materials_count);
 	printf("Model has %li buffers\n", data->buffers_count);
 	printf("Model has %li images\n", data->images_count);
+	printf("Model has %li meshes\n", data->meshes_count);
 
 	result = cgltf_load_buffers(&options, data, bin_path);
     assert(result == cgltf_result_success);
 
-	printf("Model size %li\n", data->bin_size);
+	model_t model = {0};
+	model.len_meshes = data->meshes_count;
+	model.meshes = calloc(model.len_meshes, sizeof(mesh_t));
+	assert(model.meshes != NULL);
 
-	for (size_t i = 0; i < data->meshes_count; i++)
-	{
-		cgltf_primitive *prim = &data->meshes[0].primitives[0];
-	}
+	parse_scene(data->scene);
 
     cgltf_free(data);
-
-	return (model_t){ NULL, 0, NULL };
+	return model;
 }
 
-int model_setup(model_t *model)
+void model_setup(model_t *model)
 {
-	return 1;
+	assert(model != NULL);
+
+	for (size_t i = 0; i < model->len_meshes; i++) 
+	{
+		mesh_setup(model->meshes + i);
+	}
 }
 
-void model_draw(model_t *model)
+void model_draw(model_t *model, unsigned int shader)
 {
-	
+	for (size_t i = 0; i < model->len_meshes; i++) 
+	{
+		mesh_draw(&model->meshes[i], shader);
+	}
 }
 
 void destroy_model(model_t *model)
 {
 	assert(model != NULL);
+
+	for (size_t i = 0; i < model->len_meshes; i++) 
+	{
+		mesh_destroy(&model->meshes[i]);
+	}
 }
