@@ -32,21 +32,14 @@ operations you need are available as primitives.
 	f
 	(repeated (compose f f) (- n 1))))
 
-(define dx 0.01)
-
-(define (average f)
-  (lambda (x)
-	(/ (+ 
-	  (f (+ x dx))
-	  (f x)
-	  (f (- x dx)))
-	  3)))
-
-(define (smooth f n)
-  ((repeated average n) f))
+(define (average a b)
+  (/ (+ a b) 2))
 
 (define (average-damp f)
   (lambda (x) (average x (f x))))
+
+(define (smooth f n)
+  ((repeated average-damp n) f))
 
 ;; fixed point finding function
 
@@ -57,20 +50,33 @@ operations you need are available as primitives.
 	(< (abs (- v1 v2))
 	   tolerance))
   (define (try guess)
-	(display guess) (newline)
 	(let ((next (f guess)))
 	  (if (close-enough? guess next)
 		  next
 	      (try next))))
   (try first-guess))
 
-(define (transform x)
-  (+ 1.0 (/ 1.0 x)))
+;; n-th root function
 
-;; test function
-(define (test-func n)
-  (lambda (x) 
+(define (n-th-root n x)
+  (let ((damping n))		; damping is equal to n, for n-th root.
+	   (fixed-point
+			(smooth
+				(lambda (y) (/ x (expt y (- n 1))))
+				damping)
+		1.0)))
 
-;; test fixed point convergence for n = 2
+;; test fixed point convergence
 
+(display (n-th-root 2 49))
+(newline)
+(display (n-th-root 3 81))
+(newline)
+
+;; test non-converging roots
+
+(display (n-th-root 4 4294967296))
+(newline)
+(display (n-th-root 5 36))
+(newline)
 
